@@ -1,0 +1,417 @@
+Sub 创建基础表()
+
+'设置变量
+    Dim rowmax As Integer, wb As Workbook, wbpath As String, wb1path As String, wb2path As String, wb3path As String, filpath As String, wbname As String, wb1name As String, wb2name As String, wb3name As String, sht As Worksheet, sht1name As String, sht2name As String, sht3name As String, sht4name As String'这里需要改
+    
+'变量赋值
+	filpath = "D:\会通\1.数据报告\0.三十一中阶段报告分析"  '这里需要改
+	wbpath = filpath & "\基础表.xlsx"
+	wb1path = filpath & "\期中.xls"
+	wb2path = filpath & "\期末.xls"
+	wb3path = filpath & "\配置表.xlsx"
+	wbname = "基础表"
+	wb1name = "期中"  '这里需要改
+	wb2name = "期末"  '这里需要改
+	wb3name = "配置表"
+	sht1name = "成绩排名"
+	sht2name = "学生明细表"
+	sht3name = "班级属性"
+	sht4name = "一二本线"
+	
+'在指定路径新建基础表
+	Set wb = Workbooks.Add
+    Set sht = wb.Worksheets(1)
+    With sht
+        .Name = "1"
+    End With
+    wb.SaveAs wbpath
+    ActiveWorkbook.Close
+    
+'打开指定路径的所有文件
+    Workbooks.Open (wbpath)		'基础表
+    Workbooks.Open (wb1path)	'考试1表
+    Workbooks.Open (wb2path)	'考试2表
+	Workbooks.Open (wb3path)	'配置表
+
+'将所有成绩排名工作表逐个复制到基础表中
+'打开文件夹
+    ChDir filpath
+'打开基础表、历次考试表、配置表，并复制相应的sheet
+    Workbooks.Open Filename:= wbpath
+'复制第1场考试成绩排名到基础表中
+    Windows(wb1name & ".xls").Activate
+    Sheets(sht1name).Select
+    Sheets(sht1name).Copy Before:=Workbooks(wbname & ".xlsx").Sheets(1)
+    Sheets(1).Name = wb1name
+'复制第2场考试成绩排名到基础表中
+    Windows(wb2name & ".xls").Activate
+    Sheets(sht1name).Select
+    Sheets(sht1name).Copy Before:=Workbooks(wbname & ".xlsx").Sheets(1)
+    Sheets(1).Name = wb2name
+'复制配置表内容到基础表中
+	Windows(wb3name & ".xlsx").Activate
+    Sheets(sht3name).Select
+    Sheets(sht3name).Copy After:=Workbooks(wbname & ".xlsx").Sheets(2)
+    Sheets(3).Name = sht3name
+	Windows(wb3name & ".xlsx").Activate
+    Sheets(sht4name).Select
+    Sheets(sht4name).Copy After:=Workbooks(wbname & ".xlsx").Sheets(3)
+    Sheets(4).Name = sht4name
+	
+'删除没啥用的表“1”
+    Application.DisplayAlerts = False
+    Sheets("1").Delete
+
+'调整表顺序
+    Sheets(wb1name).Select
+    Sheets(wb1name).Move Before:=Sheets(wb2name)
+'关闭考试1表   
+    Windows(wb1name & ".xls").Activate
+    ActiveWorkbook.Close savechanges:=False
+'关闭考试2表
+    Windows(wb2name & ".xls").Activate
+    ActiveWorkbook.Close savechanges:=False
+'关闭配置表
+	Windows(wb3name & ".xlsx").Activate
+    ActiveWorkbook.Close savechanges:=False
+	
+'删除标题行
+	Windows(wbname & ".xlsx").Activate
+	Sheets(wb1name).Select
+	Rows("1:2").Select
+    Selection.Delete Shift:=xlUp
+    Sheets(wb2name).Select
+    Rows("1:2").Select
+    Selection.Delete Shift:=xlUp
+	
+'生成学生明细表
+	Sheets(wb1name).Copy After:=Sheets(2)
+    Sheets(3).Name = sht2name
+
+'删除多于列（此次只分析语数外）
+	Columns("M:Z").Select
+    Selection.Delete Shift:=xlToLeft
+	Columns("E:E").Select
+    Selection.Delete Shift:=xlToLeft
+	
+'求最大行数
+	Windows(wbname & ".xlsx").Activate
+	Sheets(sht2name).Select
+	rowmax = ActiveSheet.UsedRange.Rows.Count
+	
+'插入评判标准信息
+	'插入：文理科、分层、进步标准、退步标准空白列
+	For i = 1 To 4
+		Columns("D:D").Select
+		Selection.Insert Shift:=xlToRight
+	Next
+	'重命名列标题并匹配信息
+    Range("D1").Select
+    ActiveCell.FormulaR1C1 = "文理科"
+    Sheets("学生明细表").Range("D2:D" & rowmax).Formula = "=VLOOKUP(C2,班级属性!A:E,2,FALSE)"
+    Range("E1").Select
+    ActiveCell.FormulaR1C1 = "分层"
+    Sheets("学生明细表").Range("E2:E" & rowmax).Formula = "=VLOOKUP(C2,班级属性!A:E,3,FALSE)"
+    Range("F1").Select
+    ActiveCell.FormulaR1C1 = "进步标准"
+    Sheets("学生明细表").Range("F2:F" & rowmax).Formula = "=VLOOKUP(C2,班级属性!A:E,4,FALSE)"
+    Range("G1").Select
+    ActiveCell.FormulaR1C1 = "退步标准"
+    Sheets("学生明细表").Range("G2:G" & rowmax).Formula = "=VLOOKUP(C2,班级属性!A:E,5,FALSE)"
+
+'完善总分组内容
+	'插入总分空白列
+	For i = 1 To 3
+		Columns(9).Select	'这是列I
+		Selection.Insert Shift:=xlToRight
+	Next
+	For i = 1 To 16
+		Columns(13).Select	'这是列M
+		Selection.Insert Shift:=xlToRight
+	Next
+	'重命名列标题并匹配信息
+	Range("H1").Select
+    ActiveCell.FormulaR1C1 = "期中总分"
+	Range("I1").Select
+    ActiveCell.FormulaR1C1 = "期末总分"
+	Sheets("学生明细表").Range("I2:I" & rowmax).Formula = "=VLOOKUP(A2,期末!A:L,4,FALSE)"
+	Range("J1").Select
+    ActiveCell.FormulaR1C1 = "总分波动"
+	Sheets("学生明细表").Range("J2:J" & rowmax).Formula = "=IF(H2=I2,0,TEXT(AVERAGE(H2:I2)/STDEV.P(H2:I2),0))"
+	Range("K1").Select
+    ActiveCell.FormulaR1C1 = "总分差值"
+	Sheets("学生明细表").Range("K2:K" & rowmax).Formula = "=I2-H2"
+	Range("L1").Select
+    ActiveCell.FormulaR1C1 = "期中总分级次"
+	Range("M1").Select
+    ActiveCell.FormulaR1C1 = "期末总分级次"
+	Sheets("学生明细表").Range("M2:M" & rowmax).Formula = "=VLOOKUP(A2,期末!A:L,6,FALSE)"
+	Range("N1").Select
+    ActiveCell.FormulaR1C1 = "总分进退步"
+	Sheets("学生明细表").Range("N2:N" & rowmax).Formula = "=M2-L2"
+	Range("O1").Select
+    ActiveCell.FormulaR1C1 = "总分是否进步"
+	Sheets("学生明细表").Range("O2:O" & rowmax).Formula = "=IF(AND(N2>0,ABS(N2)>F2),1,0)"
+	Range("P1").Select
+    ActiveCell.FormulaR1C1 = "总分是否退步"
+	Sheets("学生明细表").Range("P2:P" & rowmax).Formula = "=IF(AND(N2<0,ABS(N2)>G2),1,0)"
+	Range("Q1").Select
+    ActiveCell.FormulaR1C1 = "期中总分一本线名次"
+	Sheets("学生明细表").Range("Q2:Q" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$2:$J$3,5,FALSE)"
+	Range("R1").Select
+    ActiveCell.FormulaR1C1 = "期中总分二本线名次"
+	Sheets("学生明细表").Range("R2:R" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$2:$J$3,6,FALSE)"
+	Range("S1").Select
+    ActiveCell.FormulaR1C1 = "期中总分是否一本"
+	Sheets("学生明细表").Range("S2:S" & rowmax).Formula = "=IF(L2<=Q2,1,0)"
+   	Range("T1").Select
+	ActiveCell.FormulaR1C1 = "期中总分是否二本"
+	Sheets("学生明细表").Range("T2:T" & rowmax).Formula = "=IF(AND(L2<=R2,L2>Q2),1,0)"	
+	Range("U1").Select
+    ActiveCell.FormulaR1C1 = "期中总分名次一本临界"
+	Sheets("学生明细表").Range("U2:U" & rowmax).Formula = "=IF(AND(L2>=(Q2-10),L2<=Q2+10),1,0)"	
+	Range("V1").Select
+    ActiveCell.FormulaR1C1 = "期中总分名次二本临界"
+	Sheets("学生明细表").Range("V2:V" & rowmax).Formula = "=IF(AND(L2>=(R2-10),L2<=R2+10),1,0)"	
+	Range("W1").Select
+    ActiveCell.FormulaR1C1 = "期末总分一本线名次"
+	Sheets("学生明细表").Range("W2:W" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$2:$J$3,9,FALSE)"
+	Range("X1").Select
+    ActiveCell.FormulaR1C1 = "期末总分二本线名次"
+	Sheets("学生明细表").Range("X2:X" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$2:$J$3,10,FALSE)"
+	Range("Y1").Select
+    ActiveCell.FormulaR1C1 = "期末总分是否一本"
+	Sheets("学生明细表").Range("Y2:Y" & rowmax).Formula = "=IF(M2<=W2,1,0)"
+	Range("Z1").Select
+    ActiveCell.FormulaR1C1 = "期末总分是否二本"
+	Sheets("学生明细表").Range("Z2:Z" & rowmax).Formula = "=IF(AND(M2<=X2,M2>W2),1,0)"
+	Range("AA1").Select
+    ActiveCell.FormulaR1C1 = "期末总分名次一本临界"
+	Sheets("学生明细表").Range("AA2:AA" & rowmax).Formula = "=IF(AND(M2>=(W2-10),M2<=W2+10),1,0)"	
+	Range("AB1").Select
+    ActiveCell.FormulaR1C1 = "期末总分名次二本临界"
+	Sheets("学生明细表").Range("AB2:AB" & rowmax).Formula = "=IF(AND(M2>=(X2-10),M2<=X2+10),1,0)"
+	
+'完善语文组内容
+	'插入语文空白列
+	For i = 1 To 3
+		Columns("AD:AD").Select
+		Selection.Insert Shift:=xlToRight
+	Next
+	For i = 1 To 16
+		Columns("AH:AH").Select
+		Selection.Insert Shift:=xlToRight
+	Next
+	'重命名列标题并匹配信息
+	Range("AC1").Select
+    ActiveCell.FormulaR1C1 = "期中语文"
+	Range("AD1").Select
+    ActiveCell.FormulaR1C1 = "期末语文"
+	Sheets("学生明细表").Range("AD2:AD" & rowmax).Formula = "=VLOOKUP(A2,期末!A:L,4,FALSE)"
+	Range("AE1").Select
+    ActiveCell.FormulaR1C1 = "语文波动"
+	Sheets("学生明细表").Range("AE2:AE" & rowmax).Formula = "=IF(H2=I2,0,TEXT(AVERAGE(H2:I2)/STDEV.P(H2:I2),0))"
+	Range("AF1").Select
+    ActiveCell.FormulaR1C1 = "语文差值"
+	Sheets("学生明细表").Range("AF2:AF" & rowmax).Formula = "=I2-H2"
+	Range("AG1").Select
+    ActiveCell.FormulaR1C1 = "期中语文级次"
+	Range("AH1").Select
+    ActiveCell.FormulaR1C1 = "期末语文级次"
+	Sheets("学生明细表").Range("AH2:AH" & rowmax).Formula = "=VLOOKUP(A2,期末!A:L,6,FALSE)"
+	Range("AI1").Select
+    ActiveCell.FormulaR1C1 = "语文进退步"
+	Sheets("学生明细表").Range("AI2:AI" & rowmax).Formula = "=M2-L2"
+	Range("AJ1").Select
+    ActiveCell.FormulaR1C1 = "语文是否进步"
+	Sheets("学生明细表").Range("AJ2:AJ" & rowmax).Formula = "=IF(AND(N2>0,ABS(N2)>F2),1,0)"
+	Range("AK1").Select
+    ActiveCell.FormulaR1C1 = "语文是否退步"
+	Sheets("学生明细表").Range("AK2:AK" & rowmax).Formula = "=IF(AND(N2<0,ABS(N2)>G2),1,0)"
+	Range("AL1").Select
+    ActiveCell.FormulaR1C1 = "期中语文一本线名次"
+	Sheets("学生明细表").Range("AL2:AL" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$4:$J$5,5,FALSE)"
+	Range("AM1").Select
+    ActiveCell.FormulaR1C1 = "期中语文二本线名次"
+	Sheets("学生明细表").Range("AM2:AM" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$4:$J$5,6,FALSE)"
+	Range("AN1").Select
+    ActiveCell.FormulaR1C1 = "期中语文是否一本"
+	Sheets("学生明细表").Range("AN2:AN" & rowmax).Formula = "=IF(AG2<=AL2,1,0)"
+   	Range("AO1").Select
+	ActiveCell.FormulaR1C1 = "期中语文是否二本"
+	Sheets("学生明细表").Range("AO2:AO" & rowmax).Formula = "=IF(AND(AG2<=AM2,AG2>AL2),1,0)"	
+	Range("AP1").Select
+    ActiveCell.FormulaR1C1 = "期中语文名次一本临界"
+	Sheets("学生明细表").Range("AP2:AP" & rowmax).Formula = "=IF(AND(AG2>=(AL2-10),AG2<=AL2+10),1,0)"	
+	Range("AQ1").Select
+    ActiveCell.FormulaR1C1 = "期中语文名次二本临界"
+	Sheets("学生明细表").Range("AQ2:AQ" & rowmax).Formula = "=IF(AND(AG2>=(AM2-10),AG2<=AM2+10),1,0)"	
+	Range("AR1").Select
+    ActiveCell.FormulaR1C1 = "期末语文一本线名次"
+	Sheets("学生明细表").Range("AR2:AR" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$4:$J$5,9,FALSE)"
+	Range("AS1").Select
+    ActiveCell.FormulaR1C1 = "期末语文二本线名次"
+	Sheets("学生明细表").Range("AS2:AS" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$4:$J$5,10,FALSE)"
+	Range("AT1").Select
+    ActiveCell.FormulaR1C1 = "期末语文是否一本"
+	Sheets("学生明细表").Range("AT2:AT" & rowmax).Formula = "=IF(AH2<=AR2,1,0)"
+	Range("AU1").Select
+    ActiveCell.FormulaR1C1 = "期末语文是否二本"
+	Sheets("学生明细表").Range("AU2:AU" & rowmax).Formula = "=IF(AND(AH2<=AS2,AH2>AR2),1,0)"
+	Range("AV1").Select
+    ActiveCell.FormulaR1C1 = "期末语文名次一本临界"
+	Sheets("学生明细表").Range("AV2:AV" & rowmax).Formula = "=IF(AND(AH2>=(AR2-10),AH2<=AR2+10),1,0)"	
+	Range("AW1").Select
+    ActiveCell.FormulaR1C1 = "期末语文名次二本临界"
+	Sheets("学生明细表").Range("AW2:AW" & rowmax).Formula = "=IF(AND(AH2>=(AS2-10),AH2<=AS2+10),1,0)"
+
+'完善数学组内容
+	'插入：期末数学、数学波动、数学差值空白列
+	For i = 1 To 3
+		Columns("AG:AG").Select
+		Selection.Insert Shift:=xlToRight
+	Next
+	For i = 1 To 14
+		Columns("AK:AK").Select
+		Selection.Insert Shift:=xlToRight
+	Next
+	'重命名列标题并匹配信息
+	Range("AF1").Select
+    ActiveCell.FormulaR1C1 = "期中数学"
+	Range("AG1").Select
+    ActiveCell.FormulaR1C1 = "期末数学"
+	Sheets("学生明细表").Range("AG2:AG" & rowmax).Formula = "=VLOOKUP(A2,期末!A:L,9,FALSE)"
+	Range("AH1").Select
+    ActiveCell.FormulaR1C1 = "数学波动"
+	Sheets("学生明细表").Range("AH2:AH" & rowmax).Formula = "=IF(AF2=AG2,0,TEXT(AVERAGE(AF2:AG2)/STDEV.P(AF2:AG2),0))"
+	Range("AI1").Select
+    ActiveCell.FormulaR1C1 = "数学差值"
+	Sheets("学生明细表").Range("AI2:AI" & rowmax).Formula = "=AG2-AF2"
+	Range("AJ1").Select
+    ActiveCell.FormulaR1C1 = "期中数学级次"
+	Range("AK1").Select
+    ActiveCell.FormulaR1C1 = "期末数学级次"
+	Sheets("学生明细表").Range("AK2:AK" & rowmax).Formula = "=VLOOKUP(A2,期末!A:L,10,FALSE)"
+	Range("AL1").Select
+    ActiveCell.FormulaR1C1 = "数学进退步"
+	Sheets("学生明细表").Range("AL2:AL" & rowmax).Formula = "=AK2-AJ2"
+	Range("AM1").Select
+    ActiveCell.FormulaR1C1 = "数学是否进步"
+	Sheets("学生明细表").Range("AM2:AM" & rowmax).Formula = "=IF(AND(AL2>0,ABS(AL2)>F2),1,0)"
+	Range("AN1").Select
+    ActiveCell.FormulaR1C1 = "数学是否退步"
+	Sheets("学生明细表").Range("AN2:AN" & rowmax).Formula = "=IF(AND(AL2<0,ABS(AL2)>G2),1,0)
+	Range("AO1").Select
+    ActiveCell.FormulaR1C1 = "数学一本线"
+	Sheets("学生明细表").Range("AO2:AO" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$6:$D$7,3,FALSE)"
+	Range("AP1").Select
+    ActiveCell.FormulaR1C1 = "数学二本线"
+	Sheets("学生明细表").Range("AP2:AP" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$6:$D$7,4,FALSE)"
+	Range("AQ1").Select
+    ActiveCell.FormulaR1C1 = "期末数学上线"
+	Sheets("学生明细表").Range("AQ2:AQ" & rowmax).Formula = "=IF(AG2>=AO2,""一本"",IF(AG2>=AP2,""二本"",""无""))"
+
+'完善英语组内容
+	'插入：期末英语、英语波动、英语差值空白列
+	For i = 1 To 3
+		Columns("AS:AS").Select
+		Selection.Insert Shift:=xlToRight
+	Next
+	For i = 1 To 14
+		Columns("AW:AW").Select
+		Selection.Insert Shift:=xlToRight
+	Next
+	'重命名列标题并匹配信息
+	Range("AR1").Select
+    ActiveCell.FormulaR1C1 = "期中英语"
+	Range("AS1").Select
+    ActiveCell.FormulaR1C1 = "期末英语"
+	Sheets("学生明细表").Range("AS2:AS" & rowmax).Formula = "=VLOOKUP(A2,期末!A:L,11,FALSE)"
+	Range("AT1").Select
+    ActiveCell.FormulaR1C1 = "英语波动"
+	Sheets("学生明细表").Range("AT2:AT" & rowmax).Formula = "=IF(AR2=AS2,0,TEXT(AVERAGE(AR2:AS2)/STDEV.P(AR2:AS2),0))"
+	Range("AU1").Select
+    ActiveCell.FormulaR1C1 = "英语差值"
+	Sheets("学生明细表").Range("AU2:AU" & rowmax).Formula = "=AS2-AR2"
+	Range("AV1").Select
+    ActiveCell.FormulaR1C1 = "期中英语级次"
+	Range("AW1").Select
+    ActiveCell.FormulaR1C1 = "期末英语级次"
+	Sheets("学生明细表").Range("AW2:AW" & rowmax).Formula = "=VLOOKUP(A2,期末!A:L,12,FALSE)"
+	Range("AX1").Select
+    ActiveCell.FormulaR1C1 = "英语进退步"
+	Sheets("学生明细表").Range("AX2:AX" & rowmax).Formula = "=AW2-AV2"
+	Range("AY1").Select
+    ActiveCell.FormulaR1C1 = "英语是否进步"
+	Sheets("学生明细表").Range("AY2:AY" & rowmax).Formula = "=IF(AND(AX2>0,ABS(AX2)>F2),1,0)"
+	Range("AZ1").Select
+    ActiveCell.FormulaR1C1 = "英语是否退步"
+	Sheets("学生明细表").Range("AZ2:AZ" & rowmax).Formula = "=IF(AND(AX2<0,ABS(AX2)>G2),1,0)"
+	Range("BA1").Select
+    ActiveCell.FormulaR1C1 = "英语一本线"
+	Sheets("学生明细表").Range("BA2:BA" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$8:$D$9,3,FALSE)"
+	Range("BB1").Select
+    ActiveCell.FormulaR1C1 = "英语二本线"
+	Sheets("学生明细表").Range("BB2:BB" & rowmax).Formula = "=VLOOKUP(D2,一二本线!$A$8:$D$9,3,FALSE)"
+	Range("BC1").Select
+    ActiveCell.FormulaR1C1 = "期末英语上线"
+	Sheets("学生明细表").Range("BC2:BC" & rowmax).Formula = "=IF(AS2>=BA2,""一本"",IF(AS2>=BB2,""二本"",""无""))"
+
+'自适应宽度并调整格式
+	Columns("A:BC").Select
+    Columns("A:BC").EntireColumn.AutoFit
+	Range("A1").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+    Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+    With Selection.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlInsideVertical)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlInsideHorizontal)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+	
+'完结撒花！*★,°*:.☆\(￣▽￣)/$:*.°★* 。 
+	Msgbox "基础表整理完成！ヾ(*′▽｀*)ノ彡☆ "
+
+End Sub
+

@@ -1,0 +1,349 @@
+Sub 学生个人总表()
+
+'定义变量
+	dim rowmax As Integer
+
+'求最大行数
+    Range("A1").Select
+	rowmax = ActiveSheet.UsedRange.Rows.Count
+
+'粘贴为数值格式
+    Columns("A:A").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+		
+'修改列位置
+    '期中分数
+	Columns("AC:AC").Select
+    Application.CutCopyMode = False
+    Selection.Cut
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("BB:BB").Select
+    Selection.Cut
+    Columns("J:J").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("CA:CA").Select
+    Selection.Cut
+    Columns("K:K").Select
+    Selection.Insert Shift:=xlToRight
+	
+	'期末分数
+    Columns("AF:AF").Select
+    Selection.Cut
+    Columns("M:M").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("BD:BD").Select
+    Selection.Cut
+    Columns("N:N").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("CB:CB").Select
+    Selection.Cut
+    Columns("O:O").Select
+    Selection.Insert Shift:=xlToRight
+	
+	'分数波动
+    Columns("AI:AI").Select
+    Selection.Cut
+    Columns("Q:Q").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("BF:BF").Select
+    Selection.Cut
+    Columns("R:R").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("CC:CC").Select
+    Selection.Cut
+    Columns("S:S").Select
+    Selection.Insert Shift:=xlToRight
+	
+	'分数差值
+    Columns("AL:AL").Select
+    Selection.Cut
+    Columns("U:U").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("BH:BH").Select
+    Selection.Cut
+    Columns("V:V").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("CD:CD").Select
+    Selection.Cut
+    Columns("W:W").Select
+    Selection.Insert Shift:=xlToRight
+	
+	'期中级次
+    Columns("AO:AO").Select
+    Selection.Cut
+    Columns("Y:Y").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("BJ:BJ").Select
+    Selection.Cut
+    Columns("Z:Z").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("CE:CE").Select
+    Selection.Cut
+    Columns("AA:AA").Select
+    Selection.Insert Shift:=xlToRight
+	
+	'期末级次
+    Columns("AR:AR").Select
+    Selection.Cut
+    Columns("AC:AC").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("BL:BL").Select
+    Selection.Cut
+    Columns("AD:AD").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("CF:CF").Select
+    Selection.Cut
+    Columns("AE:AE").Select
+    Selection.Insert Shift:=xlToRight
+	
+	'进退步
+    Columns("AU:AU").Select
+    Selection.Cut
+    Columns("AG:AG").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("BN:BN").Select
+    Selection.Cut
+    Columns("AH:AH").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("CG:CG").Select
+    Selection.Cut
+    Columns("AI:AI").Select
+    Selection.Insert Shift:=xlToRight
+	
+	'删除是否进退步
+    Columns("AJ:AK").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("AV:AW").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("BL:BM").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("CB:CC").Select
+    Selection.Delete Shift:=xlToLeft
+	
+	'删除期中期末一二本线
+	Columns("AJ:AK").Select
+    Selection.Delete Shift:=xlToLeft
+	Columns("AN:AO").Select
+    Selection.Delete Shift:=xlToLeft
+	Columns("AR:AS").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("AX:AY").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("BD:BE").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("BJ:BK").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("BP:BQ").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("BV:BW").Select
+    Selection.Delete Shift:=xlToLeft
+	
+	'删除进退步标准
+	Columns("F:G").Select
+    Selection.Delete Shift:=xlToLeft
+	
+'修改列标题
+    Range("R1").Select
+    ActiveCell.FormulaR1C1 = "总分变化"
+    Range("S1").Select
+    ActiveCell.FormulaR1C1 = "语文分数变化"
+    Range("T1").Select
+    ActiveCell.FormulaR1C1 = "数学分数变化"
+    Range("U1").Select
+    ActiveCell.FormulaR1C1 = "英语分数变化"
+    Range("AD1").Select
+    ActiveCell.FormulaR1C1 = "总分名次变化"
+    Range("AE1").Select
+    ActiveCell.FormulaR1C1 = "语文名次变化"
+    Range("AF1").Select
+    ActiveCell.FormulaR1C1 = "数学名次变化"
+    Range("AG1").Select
+    ActiveCell.FormulaR1C1 = "英语名次变化"
+
+'变化增加条件格式
+	Range("R:U,AD:AG").Select
+    Range("AJ1").Activate
+    Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlLess, _
+        Formula1:="=0"
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    With Selection.FormatConditions(1).Font
+        .Color = -16776961
+        .TintAndShade = 0
+    End With
+    Selection.FormatConditions(1).StopIfTrue = False
+    Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlGreater, _
+        Formula1:="=0"
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    With Selection.FormatConditions(1).Font
+        .ThemeColor = xlThemeColorAccent6
+        .TintAndShade = 0
+    End With
+    Selection.FormatConditions(1).StopIfTrue = False
+    Range("R1:U1,AD1:AG1").Select
+    Range("AJ1").Activate
+    Selection.FormatConditions.Delete
+	
+'插入空白列
+    Columns("AH:BC").Select
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove	
+
+'上线情况
+	Range("AH1").Select
+    ActiveCell.FormulaR1C1 = "期中总分上线"
+    Range("AI1").Select
+    ActiveCell.FormulaR1C1 = "期末总分上线"
+    Range("AJ1").Select
+    ActiveCell.FormulaR1C1 = "期中语文上线"
+    Range("AK1").Select
+    ActiveCell.FormulaR1C1 = "期末语文上线"
+    Range("AL1").Select
+    ActiveCell.FormulaR1C1 = "期中数学上线"
+    Range("AM1").Select
+    ActiveCell.FormulaR1C1 = "期末数学上线"
+    Range("AN1").Select
+    ActiveCell.FormulaR1C1 = "期中英语上线"
+    Range("AO1").Select
+    ActiveCell.FormulaR1C1 = "期末英语上线"
+
+'有效情况
+	Range("AP1").Select
+    ActiveCell.FormulaR1C1 = "期中语文有效"
+    Range("AQ1").Select
+    ActiveCell.FormulaR1C1 = "期末语文有效"
+    Range("AR1").Select
+    ActiveCell.FormulaR1C1 = "期中数学有效"
+    Range("AS1").Select
+    ActiveCell.FormulaR1C1 = "期末数学有效"
+    Range("AT1").Select
+    ActiveCell.FormulaR1C1 = "期中英语有效"
+    Range("AU1").Select
+    ActiveCell.FormulaR1C1 = "期末英语有效"
+	
+'临界情况
+	Range("AV1").Select
+    ActiveCell.FormulaR1C1 = "期中总分临界"
+    Range("AW1").Select
+    ActiveCell.FormulaR1C1 = "期末总分临界"
+    Range("AX1").Select
+    ActiveCell.FormulaR1C1 = "期中语文临界"
+    Range("AY1").Select
+    ActiveCell.FormulaR1C1 = "期末语文临界"
+    Range("AZ1").Select
+    ActiveCell.FormulaR1C1 = "期中数学临界"
+    Range("BA1").Select
+    ActiveCell.FormulaR1C1 = "期末数学临界"
+    Range("BB1").Select
+    ActiveCell.FormulaR1C1 = "期中英语临界"
+    Range("BC1").Select
+    ActiveCell.FormulaR1C1 = "期末英语临界"
+	
+'改列标题颜色
+	Range("A1:E1").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent4
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+    Range("F1:I1,N1:Q1,V1:Y1,AD1:AG1,AP1:AU1").Select
+    Range("AD1").Activate
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+    Range("J1:M1,R1:U1,Z1:AC1,AH1:AO1,AV1:BC1").Select
+    Range("Z1").Activate
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent6
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+
+'公式计算
+    Range("AH1").Select
+    Sheets("学生明细表").Range("AH2:AH" & rowmax).Formula = "=IF(BD2=1,""一本"",IF(BE2=1,""二本"",""))"
+    Range("AI1").Select
+    Sheets("学生明细表").Range("AI2:AI" & rowmax).Formula = "=IF(BH2=1,""一本"",IF(BI2=1,""二本"",""))"
+    Range("AJ1").Select
+    Sheets("学生明细表").Range("AJ2:AJ" & rowmax).Formula = "=IF(BL2=1,""一本"",IF(BN2=1,""二本"",""))"
+    Range("AK1").Select
+    Sheets("学生明细表").Range("AK2:AK" & rowmax).Formula = "=IF(BR2=1,""一本"",IF(BT2=1,""二本"",""))"
+    Range("AL1").Select
+    Sheets("学生明细表").Range("AL2:AL" & rowmax).Formula = "=IF(BX2=1,""一本"",IF(BZ2=1,""二本"",""))"
+    Range("AM1").Select
+    Sheets("学生明细表").Range("AM2:AM" & rowmax).Formula = "=IF(CD2=1,""一本"",IF(CF2=1,""二本"",""))"
+    Range("AN1").Select
+    Sheets("学生明细表").Range("AN2:AN" & rowmax).Formula = "=IF(CJ2=1,""一本"",IF(CL2=1,""二本"",""))"
+    Range("AO1").Select
+    Sheets("学生明细表").Range("AO2:AO" & rowmax).Formula = "=IF(CP2=1,""一本"",IF(CR2=1,""二本"",""))"
+    Range("AP1").Select
+    Sheets("学生明细表").Range("AP2:AP" & rowmax).Formula = "=IF($AH$2=AJ2,""有效"","")"
+    Range("AQ1").Select
+    Sheets("学生明细表").Range("AQ2:AQ" & rowmax).Formula = "=IF($AI$2=AK2,""有效"","")"
+	Range("AR1").Select
+    Sheets("学生明细表").Range("AR2:AR" & rowmax).Formula = "=IF($AH$2=AL2,""有效"","")"
+    Range("AS1").Select
+    Sheets("学生明细表").Range("AS2:AS" & rowmax).Formula = "=IF($AI$2=AM2,""有效"","")"
+    Range("AT1").Select
+    Sheets("学生明细表").Range("AT2:AT" & rowmax).Formula = "=IF($AH$2=AN2,""有效"","")"
+    Range("AU1").Select
+    Sheets("学生明细表").Range("AU2:AU" & rowmax).Formula = "=IF($AI$2=AO2,""有效"","")"
+    Range("AV1").Select
+    Sheets("学生明细表").Range("AV2:AV" & rowmax).Formula = "=IF(AND(BF2=0,BG2=0),"",IF(AND(BF2=1,BG2=0),""一本临界"",IF(AND(BF2=0,BG2=1),""二本临界"",""异常"")))"
+    Range("AW1").Select
+    Sheets("学生明细表").Range("AW2:AW" & rowmax).Formula = "=IF(AND(BJ2=0,BK2=0),"",IF(AND(BJ2=1,BK2=0),""一本临界"",IF(AND(BJ2=0,BK2=1),""二本临界"",""异常"")))"
+    Range("AX1").Select
+    Sheets("学生明细表").Range("AX2:AX" & rowmax).Formula = "=IF(AND(BP2=0,BQ2=0),"",IF(AND(BP2=1,BQ2=0),""一本临界"",IF(AND(BP2=0,BQ2=1),""二本临界"",""异常"")))"
+    Range("AY1").Select
+    Sheets("学生明细表").Range("AY2:AY" & rowmax).Formula = "=IF(AND(BV2=0,BW2=0),"",IF(AND(BV2=1,BW2=0),""一本临界"",IF(AND(BV2=0,BW2=1),""二本临界"",""异常"")))"
+    Range("AZ1").Select
+    Sheets("学生明细表").Range("AZ2:AZ" & rowmax).Formula = "=IF(AND(CB2=0,CC2=0),"",IF(AND(CB2=1,CC2=0),""一本临界"",IF(AND(CB2=0,CC2=1),""二本临界"",""异常"")))"
+    Range("BA1").Select
+    Sheets("学生明细表").Range("BA2:BA" & rowmax).Formula = "=IF(AND(CH2=0,CI2=0),"",IF(AND(CH2=1,CI2=0),""一本临界"",IF(AND(CH2=0,CI2=1),""二本临界"",""异常"")))"
+    Range("BB1").Select
+    Sheets("学生明细表").Range("BB2:BB" & rowmax).Formula = "=IF(AND(CN2=0,CO2=0),"",IF(AND(CN2=1,CO2=0),""一本临界"",IF(AND(CN2=0,CO2=1),""二本临界"",""异常"")))"
+	Range("BC1").Select
+    Sheets("学生明细表").Range("BC2:BC" & rowmax).Formula = "=IF(AND(CT2=0,CU2=0),"",IF(AND(CT2=1,CU2=0),""一本临界"",IF(AND(CT2=0,CU2=1),""二本临界"",""异常"")))"
+
+'删除列
+    Columns("AH:BC").Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Columns("BD:BD").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Application.CutCopyMode = False
+    Selection.Delete Shift:=xlToLeft
+    Columns("AV:AV").Select
+    Range("AV:AV,AH:AH,V:V,R:R").Select
+    Range("R1").Activate
+    Range("AV:AV,AH:AH,V:V,R:R,N:N,J:J,F:F").Select
+    Range("F1").Activate
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    Range("F:F,K:K,P:P,U:U,Z:Z,AM:AM").Select
+    Range("AM1").Activate
+    Range("F:F,K:K,P:P,U:U,Z:Z,AM:AM,AV:AV,BB:BB").Select
+    Range("BB1").Activate
+    Selection.ColumnWidth = 1
+	
+	需要隔行标色
+	
+'完结撒花！*★,°*:.☆\(￣▽￣)/$:*.°★* 。 
+	Msgbox "基础表整理完成！ヾ(*′▽｀*)ノ彡☆ "
+
+End Sub
+

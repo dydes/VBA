@@ -1,0 +1,9 @@
+Sub testFile()
+    Dim fil As String
+    fil = "D:\VBA练习\员工花名册.xlsx"
+    If Len(Dir(fil)) > 0 Then
+        MsgBox "工作簿已存在！"
+    Else
+        MsgBox "工作簿不存在！"
+    End If
+End Sub

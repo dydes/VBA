@@ -1,0 +1,159 @@
+Sub 表格整理()
+
+Dim rowmax As Integer
+rowmax = ActiveSheet.UsedRange.Rows.Count
+
+'调整列顺序
+    Columns("E:E").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("I:I").Select
+    Selection.Cut
+    Columns("F:F").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("Q:Q").Select
+    Selection.Cut
+    Columns("G:G").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("U:U").Select
+    Selection.Cut
+    Columns("E:E").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("Y:Y").Select
+    Selection.Cut
+    Columns("F:F").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AC:AC").Select
+    Selection.Cut
+    Columns("G:G").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("N:N").Select
+    Selection.Cut
+    Columns("L:L").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("U:U").Select
+    Selection.Cut
+    Columns("M:M").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("X:X").Select
+    Selection.Cut
+    Columns("K:K").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AA:AA").Select
+    Selection.Cut
+    Columns("L:L").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AD:AD").Select
+    Selection.Cut
+    Columns("M:M").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("S:S").Select
+    Selection.Cut
+    Columns("R:R").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("Y:Y").Select
+    Selection.Cut
+    Columns("S:S").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AC:AC").Select
+    Selection.Cut
+    Columns("AB:AB").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AA:AB").Select
+    Selection.Cut
+    Columns("Q:Q").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AE:AE").Select
+    Selection.Cut
+    Columns("V:V").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AC:AC").Select
+    Selection.Cut
+    Columns("AC:AF").Select
+    Application.CutCopyMode = False
+    Selection.Cut
+    Columns("Y:Y").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AC:AF").Select
+    Selection.Delete Shift:=xlToLeft
+	Columns("AQ:AR").Select
+    Selection.Cut
+    Columns("AE:AE").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AS:AT").Select
+    Selection.Cut
+    Columns("AI:AI").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AO:AP").Select
+    Selection.Cut
+    Columns("AI:AI").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AQ:AR").Select
+    Selection.Cut
+    Columns("AO:AO").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AU:AV").Select
+    Selection.Cut
+    Columns("AQ:AQ").Select
+    Selection.Insert Shift:=xlToRight
+	Columns("U:U").Select
+    Selection.Cut
+    Columns("S:S").Select
+    Selection.Insert Shift:=xlToRight
+
+'改列标题颜色
+    Range("E1:J1,Q1:V1,AC1:AF1").Select
+    Range("AC1").Activate
+    Range("E1:J1,Q1:V1,AC1:AF1,AM1:AR1").Select
+    Range("AM1").Activate
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+    Range("K1:P1,W1:AB1,AG1:AL1").Select
+    Range("AG1").Activate
+    Range("K1:P1,W1:AB1,AG1:AL1,AS1:AX1").Select
+    Range("AS1").Activate
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent6
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+
+'循环插入列
+    For i = 8 To 36 Step 4
+    Columns(i).Select
+    Selection.Insert Shift:=xlToRight
+    Next
+    Columns("AO:AO").Select
+    Selection.Insert Shift:=xlToRight
+    For i = 48 To 60 Step 7
+    Columns(i).Select
+    Selection.Insert Shift:=xlToRight
+    Next
+	
+'调整有效字段
+    Columns("AR:AS").Select
+    Selection.Cut
+    Columns("AW:AW").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("AY:AZ").Select
+    Selection.Cut
+    Columns("BD:BD").Select
+    Selection.Insert Shift:=xlToRight
+    Columns("BF:BG").Select
+    Selection.Cut
+    Columns("BK:BK").Select
+    Selection.Insert Shift:=xlToRight
+	
+	期中总分级次 / 期末总分级次 / 总分名次变化
+	=CONCATENATE(E2," / ",F2," / ",G2)
+	
+	期中总分上线 / 期末总分上线 / 临界
+	=IF(AND(AM2="",AN2=""),CONCATENATE(AK2," / ",AL2),IF(AND(AM2="",AN2<>""),CONCATENATE(AK2," / ",AL2,"(临)"),IF(AND(AM2<>"",AN2=""),CONCATENATE(AK2,"(临) / ",AL2),CONCATENATE(AK2,"(临) / ",AL2,"(临)"))))
+	
+End Sub

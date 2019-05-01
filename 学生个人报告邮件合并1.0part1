@@ -1,0 +1,650 @@
+Sub 学生个人邮件合并1()
+
+'填写文件位置
+	Dim filpath As String
+	
+'变量赋值
+	filpath = "D:\会通\1.数据报告\0.三十一中阶段报告分析\高二综合表-精简.xlsx"
+
+'连接邮件合并表
+    ActiveDocument.MailMerge.OpenDataSource Name:= _
+        filpath, ConfirmConversions:=False, _
+        ReadOnly:=False, LinkToSource:=True, AddToRecentFiles:=False, _
+        PasswordDocument:="", PasswordTemplate:="", WritePasswordDocument:="", _
+        WritePasswordTemplate:="", Revert:=False, Format:=wdOpenFormatAuto, _
+        Connection:= _
+        "Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=filpath;Mode=Read;Extended Properties=""HDR=YES;IMEX=1;"";Jet OLEDB:System database="""";Jet OLEDB:Registry Path="""";Jet OLEDB:Engine Type=37;Jet OLEDB:Database Locking" _
+        , SQLStatement:="SELECT * FROM `'基础表$'`", SQLStatement1:="", _
+        SubType:=wdMergeSubTypeAccess
+
+'填写总分表
+	'定位到@1
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@1"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "班级"
+'定位到@2
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@2"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "姓名"
+		
+'定位到@3
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@3"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "姓名"
+'定位到@4
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@4"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "姓名"
+'定位到@5
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@5"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中总分"
+'定位到@6
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@6"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中总分排名"
+'定位到@7
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@7"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "总分满分"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语文满分"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "数学满分"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "英语满分"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=3
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中总分一本线"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中语文一本线"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中数学一本线"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中英语一本线"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=3
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中考试总分及排名"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中考试语文及排名"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中考试数学及排名"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期中考试英语及排名"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=3
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期末考试总分及排名"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期末考试语文及排名"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期末考试数学及排名"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "期末考试英语及排名"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=3
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "总分及名次变动"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语文及名次变动"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "数学及名次变动"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "英语及名次变动"
+'定位到@8
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@8"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均题1"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均题2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均题3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均题4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均题5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均题6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均题7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均题8"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均题1"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均题2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均题3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均题4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均题5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均题6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均题7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均题8"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个题1"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个题2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个题3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个题4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个题5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个题6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个题7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个题8"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个题1"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个题2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个题3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个题4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个题5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个题6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个题7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个题8"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语题变动1"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语题变动2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语题变动3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语题变动4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语题变动5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语题变动6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语题变动7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语题变动8"
+'定位到@9
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@9"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知1"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知8"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知1"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知8"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知1"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知8"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知1"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知8"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动1"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动2"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动3"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动4"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动5"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动6"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动7"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动8"
+'定位到@A
+	Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "@A"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Selection.Find.Execute
+    Selection.TypeBackspace
+    '填充邮件合并域
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知9"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知10"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知11"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知12"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知13"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知14"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知15"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语均知16"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知9"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知10"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知11"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知12"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知13"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知14"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知15"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语均知16"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+	ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知9"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知10"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知11"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知12"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知13"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知14"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知15"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "中语个知16"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知9"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知10"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知11"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知12"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知13"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知14"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知15"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "末语个知16"
+    Selection.MoveDown Unit:=wdLine, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=7
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动9"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动10"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动11"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动12"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动13"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动14"
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动15"
+	Selection.MoveRight Unit:=wdCharacter, Count:=1
+    ActiveDocument.MailMerge.Fields.Add Range:=Selection.Range, Name:= _
+        "语知变动16"
+
+MsgBox "插入完成！"
+end sub
+
+

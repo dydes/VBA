@@ -1,0 +1,11 @@
+Sub wbInput()
+    Dim wb As String, xrow As Integer, arr
+    wb = "D:\VBA练习\员工花名册.xlsx"
+    Workbooks.Open (wb)
+    With ActiveWorkbook.Worksheets(1)
+        xrow = .Range("A1").CurrentRegion.Rows.Count + 1
+        arr = Array(xrow - 1, "马军", "男", #7/8/1987#, #9/1/2010#, "10年新招")
+        .Cells(xrow - 1).Resize(1, 6) = arr
+    End With
+    ActiveWorkbook.Close savechanges:=False
+End Sub

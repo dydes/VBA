@@ -1,0 +1,11 @@
+Sub wbAdd()
+Dim wb As Workbook, sht As Worksheet
+Set wb = Workbooks.Add
+Set sht = wb.Worksheets(1)
+With sht
+    .Name = "花名册"
+    .Range("A1:F1") = Array("序号", "姓名", "性别", "出生年月", "参加工作时间", "备注")
+End With
+wb.SaveAs "D:\VBA练习\员工花名册.xlsx"
+ActiveWorkbook.Close
+End Sub

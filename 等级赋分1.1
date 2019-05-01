@@ -1,0 +1,274 @@
+Sub 生成全科等级赋分表()
+
+'定义变量
+    Dim title As String, subTitle As String, rowmax As Integer
+
+'临时存储标题（标题合并处理的话，目前有点问题，有待研究）
+    Range("A1:Z2").Select
+    Application.CutCopyMode = False
+    With Selection
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    With Selection
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    With Selection
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    With Selection
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    Selection.UnMerge
+
+'存储标题内容
+    title = Range("A1").Value
+    subTitle = Range("A2").Value
+
+'删除标题行
+    Rows("1:2").Select
+    Selection.Delete Shift:=xlUp
+
+'文本转数值格式
+    For i = 1 To 26
+    Cells(2, i).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.TextToColumns Destination:=Cells(2, i), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+        Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
+        :=Array(1, 1), TrailingMinusNumbers:=True
+    Next
+
+'单独插入总分赋分列
+    Columns(5).Select
+    Cells(3, 5).Activate
+    Selection.Insert Shift:=xlToRight
+    
+'循环插入各单科赋分列
+    For i = 16 To 40 Step 4
+        Columns(i).Select
+        Selection.Insert Shift:=xlToRight
+        Selection.Insert Shift:=xlToRight
+    Next
+
+'填入数组
+    Range("A1:M1") = Array("学生学号", "姓名", "班级", "原始总分", "赋分总分", "班级排名", "年级排名", "语文", "年级排名", "数学", "年级排名", "英语", "年级排名")
+    Range("N1:Y1") = Array("物理原始分", "年级排名", "物理等级", "物理赋分", "化学原始分", "年级排名", "化学等级", "化学赋分", "生物原始分", "年级排名", "生物等级", "生物赋分")
+    Range("Z1:AK1") = Array("历史原始分", "年级排名", "历史等级", "历史赋分", "地理原始分", "年级排名", "地理等级", "地理赋分", "政治原始分", "年级排名", "政治等级", "政治赋分")
+    Range("AL1:AM1") = Array("语数外总分", "年级排名")
+    
+'替换--
+    Columns("A:A").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Selection.Replace What:="--", Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+
+'计算等级及赋分
+    rowmax = ActiveSheet.UsedRange.Rows.Count
+    Sheets("全科").Range("P2:P" & rowmax).Formula = "=IF(O2<>"""",LOOKUP(O2/(COUNTA(O:O)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{""A1"",""A2"",""A3"",""A4"",""A5"",""B1"",""B2"",""B3"",""B4"",""B5"",""C1"",""C2"",""C3"",""C4"",""C5"",""D1"",""D2"",""D3"",""D4"",""D5"",""E""}),0)"
+    Sheets("全科").Range("Q2:Q" & rowmax).Formula = "=IF(O2<>"""",LOOKUP(O2/(COUNTA(O:O)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{100,97,94,91,88,85,82,79,76,73,70,67,64,61,58,55,52,49,46,43,40}),0)"
+    Sheets("全科").Range("T2:T" & rowmax).Formula = "=IF(S2<>"""",LOOKUP(S2/(COUNTA(S:S)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{""A1"",""A2"",""A3"",""A4"",""A5"",""B1"",""B2"",""B3"",""B4"",""B5"",""C1"",""C2"",""C3"",""C4"",""C5"",""D1"",""D2"",""D3"",""D4"",""D5"",""E""}),0)"
+    Sheets("全科").Range("U2:U" & rowmax).Formula = "=IF(S2<>"""",LOOKUP(S2/(COUNTA(S:S)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{100,97,94,91,88,85,82,79,76,73,70,67,64,61,58,55,52,49,46,43,40}),0)"
+    Sheets("全科").Range("X2:X" & rowmax).Formula = "=IF(W2<>"""",LOOKUP(W2/(COUNTA(W:W)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{""A1"",""A2"",""A3"",""A4"",""A5"",""B1"",""B2"",""B3"",""B4"",""B5"",""C1"",""C2"",""C3"",""C4"",""C5"",""D1"",""D2"",""D3"",""D4"",""D5"",""E""}),0)"
+    Sheets("全科").Range("Y2:Y" & rowmax).Formula = "=IF(W2<>"""",LOOKUP(W2/(COUNTA(W:W)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{100,97,94,91,88,85,82,79,76,73,70,67,64,61,58,55,52,49,46,43,40}),0)"
+    Sheets("全科").Range("AB2:AB" & rowmax).Formula = "=IF(AA2<>"""",LOOKUP(AA2/(COUNTA(AA:AA)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{""A1"",""A2"",""A3"",""A4"",""A5"",""B1"",""B2"",""B3"",""B4"",""B5"",""C1"",""C2"",""C3"",""C4"",""C5"",""D1"",""D2"",""D3"",""D4"",""D5"",""E""}),0)"
+    Sheets("全科").Range("AC2:AC" & rowmax).Formula = "=IF(AA2<>"""",LOOKUP(AA2/(COUNTA(AA:AA)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{100,97,94,91,88,85,82,79,76,73,70,67,64,61,58,55,52,49,46,43,40}),0)"
+    Sheets("全科").Range("AF2:AF" & rowmax).Formula = "=IF(AE2<>"""",LOOKUP(AE2/(COUNTA(AE:AE)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{""A1"",""A2"",""A3"",""A4"",""A5"",""B1"",""B2"",""B3"",""B4"",""B5"",""C1"",""C2"",""C3"",""C4"",""C5"",""D1"",""D2"",""D3"",""D4"",""D5"",""E""}),0)"
+    Sheets("全科").Range("AG2:AG" & rowmax).Formula = "=IF(AE2<>"""",LOOKUP(AE2/(COUNTA(AE:AE)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{100,97,94,91,88,85,82,79,76,73,70,67,64,61,58,55,52,49,46,43,40}),0)"
+    Sheets("全科").Range("AJ2:AJ" & rowmax).Formula = "=IF(AI2<>"""",LOOKUP(AI2/(COUNTA(AI:AI)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{""A1"",""A2"",""A3"",""A4"",""A5"",""B1"",""B2"",""B3"",""B4"",""B5"",""C1"",""C2"",""C3"",""C4"",""C5"",""D1"",""D2"",""D3"",""D4"",""D5"",""E""}),0)"
+    Sheets("全科").Range("AK2:AK" & rowmax).Formula = "=IF(AI2<>"""",LOOKUP(AI2/(COUNTA(AI:AI)-1),{0,1,3,6,10,15,22,30,39,47,55,62,68,74,80,85,89,93,96,98,99}%,{100,97,94,91,88,85,82,79,76,73,70,67,64,61,58,55,52,49,46,43,40}),0)"
+
+'所有数都贴为死数
+    Columns("A:A").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+'求和
+    Sheets("全科").Range("E2:E" & rowmax).Formula = "=H2+J2+L2+Q2+U2+Y2+AC2+AG2+AK2"
+
+'总分列都贴为死数
+    Columns("E:E").Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+
+'把赋分列的空替换为0
+    Range("P:Q,T:U,X:Y,AB:AC,AF:AG,AJ:AK").Select
+    Selection.Replace What:="0", Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+
+'创建各单科Sheet
+    Sheets.Add After:=ActiveSheet
+    Sheets(2).Name = "语文"
+    Sheets.Add After:=ActiveSheet
+    Sheets(3).Name = "数学"
+    Sheets.Add After:=ActiveSheet
+    Sheets(4).Name = "英语"
+    Sheets.Add After:=ActiveSheet
+    Sheets(5).Name = "物理"
+    Sheets.Add After:=ActiveSheet
+    Sheets(6).Name = "化学"
+    Sheets.Add After:=ActiveSheet
+    Sheets(7).Name = "生物"
+    Sheets.Add After:=ActiveSheet
+    Sheets(8).Name = "历史"
+    Sheets.Add After:=ActiveSheet
+    Sheets(9).Name = "地理"
+    Sheets.Add After:=ActiveSheet
+    Sheets(10).Name = "政治"
+    
+'将全科表对应内容复制到单科表中
+    Sheets("全科").Select
+    Columns("A:I").Select
+    Selection.Copy
+    Sheets("语文").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    
+    Sheets("全科").Select
+    Range("A:G,J:K").Select
+    Selection.Copy
+    Sheets("数学").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    Sheets("全科").Select
+    Range("A:G,L:M").Select
+    Selection.Copy
+    Sheets("英语").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    Sheets("全科").Select
+    Range("A:G,N:Q").Select
+    Selection.Copy
+    Sheets("物理").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    Sheets("全科").Select
+    Range("A:G,R:U").Select
+    Selection.Copy
+    Sheets("化学").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    Sheets("全科").Select
+    Range("A:G,V:Y").Select
+    Selection.Copy
+    Sheets("生物").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    Sheets("全科").Select
+    Range("A:G,Z:AC").Select
+    Selection.Copy
+    Sheets("历史").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    Sheets("全科").Select
+    Range("A:G,AD:AG").Select
+    Selection.Copy
+    Sheets("地理").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    Sheets("全科").Select
+    Range("A:G,AH:AK").Select
+    Selection.Copy
+    Sheets("政治").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+
+'设置打印格式
+    For i = 1 To 10 Step 1
+    Sheets(i).Select
+    Columns("A:A").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Columns("A:K").EntireColumn.AutoFit
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+    Next
+    For i = 5 To 10 Step 1
+    Sheets(i).Select
+    ActiveWindow.View = xlPageBreakPreview
+    ActiveWindow.View = xlPageBreakPreview
+    ActiveSheet.VPageBreaks(1).DragOff Direction:=xlToRight, RegionIndex:=1
+    ActiveWindow.View = xlNormalView
+    Next
+    Sheets("全科").Select
+    
+'删除按钮
+    ActiveSheet.Shapes.Range(Array("Button 29")).Select
+    Selection.Delete
+    
+'完成提示
+    MsgBox "生成完成"
+    
+End Sub
+
+

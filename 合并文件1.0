@@ -1,0 +1,29 @@
+Sub 合并文件1()
+
+'新建Word对象
+Dim WordApp As Object, i As Integer
+Set WordApp = CreateObject("Word.Application")
+
+'合并学生所有文档
+
+Dim arr
+arr = Array("杜玲玉", "樊宇晶", "高志鑫", "郭梦溪", "郭翔远", "孔钟康", "李博浩", "李尚璇", "李艳格", "李颖", "李钰琳", "刘凡硕", "刘梦茹", "马玉莹", "彭昌贤", "彭舒展", "沈聪慧", "沈麟", "王博渊", "王军伟", "王嫣雯", "王育洁", "谢永强", "杨如艳", "杨文博", "姚艺", "张洪发", "张金铃", "张礼烨", "张一帆", "张艺果", "张宇腾", "张志坤", "郑倩倩", "周冰懿", "周欣欣")
+For i = 1 To 36 Step 1
+    Selection.InsertFile FileName:="D:\会通\合并\" & arr(i) & "-1.docx", Range:="", ConfirmConversions _
+        :=False, Link:=False, Attachment:=False
+    Selection.InsertFile FileName:="D:\会通\合并\" & arr(i) & "-2.docx", Range:="", ConfirmConversions _
+        :=False, Link:=False, Attachment:=False
+'保存文档
+ChangeFileOpenDirectory "D:\会通\合并"
+ActiveDocument.SaveAs2 FileName:="!" & arr(i) & ".docx", FileFormat:=wdFormatXMLDocument _
+    , LockComments:=False, Password:="", AddToRecentFiles:=True, _
+    WritePassword:="", ReadOnlyRecommended:=False, EmbedTrueTypeFonts:=False, _
+        SaveNativePictureFormat:=False, SaveFormsData:=False, SaveAsAOCELetter:= _
+    False, CompatibilityMode:=15
+Next
+
+'关闭退出
+ActiveWindow.Close
+'Application.Quit
+
+End Sub
