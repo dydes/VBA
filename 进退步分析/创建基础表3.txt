@@ -1,0 +1,176 @@
+Sub 创建基础表()
+
+'说明：
+'1.临界按分数算的
+'2.二本包含了一本
+'3.一二本分数线按分数算的
+
+'设置变量
+    Dim rowmax As Integer, wb As Workbook, wbpath As String, wb1path As String, wb2path As String, wb3path As String, filpath As String, wbname As String, wb1name As String, wb2name As String, wb3name As String, sht As Worksheet, sht1name As String, sht2name As String, sht3name As String, sht4name As String
+    '这里需要改
+ 
+ '定义一个excel列表数组，用来与Start组合循环插入列和每列的第一行单元格
+    Dim STR
+    STR = Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ", "BA", "BB", "BC", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BK", "BL", "BM", "BN", "BO", "BP", "BQ", "BR", "BS", "BT", "BU", "BV", "BW", "BX", "BY", "BZ")
+ 
+ '定义了一个学科数组通过各年级增减学科，按照期中期末共同学科顺序编辑数组内容
+    Dim S
+    S = [{"语文","数学","英语","物理","化学","生物","历史","地理","政治"}]
+    
+'定义Start用来表示表格列选择，N用来学科轮转变量，v，w是Vlookup公式内的变量，动态获得期末的各科分数和排名
+    Dim Start, N, v, w As Integer
+    v = 7
+    w = 8
+    N = 1
+    Start = 14
+'变量赋值
+    filpath = "C:\Users\Administrator\Desktop\汇文高二文件夹"  '这里需要改
+    wbpath = filpath & "\基础表.xlsx"
+    wb1path = filpath & "\期中.xls"
+    wb2path = filpath & "\期末.xls"
+    wb3path = filpath & "\配置表.xlsx"
+    wbname = "基础表"
+    wb1name = "期中"  '这里需要改
+    wb2name = "期末"  '这里需要改
+    wb3name = "配置表"
+    sht1name = "成绩排名"
+    sht2name = "学生明细表"
+    sht3name = "班级属性"
+    sht4name = "一二本线"
+    
+'在指定路径新建基础表 Set wb = Workbooks.Add Set sht = wb.Worksheets(1) With sht .Name = "1" End With wb.SaveAs wbpath ActiveWorkbook.Close '打开指定路径的所有文件 Workbooks.Open (wbpath)     '基础表 Workbooks.Open (wb1path)    '考试1表 Workbooks.Open (wb2path)    '考试2表 Workbooks.Open (wb3path)    '配置表 '将所有成绩排名工作表逐个复制到基础表中 '打开文件夹 ChDir filpath '打开基础表、历次考试表、配置表，并复制相应的sheet Workbooks.Open Filename:=wbpath '复制第1场考试成绩排名到基础表中 Windows(wb1name & ".xls").Activate Sheets(sht1name).Select Sheets(sht1name).Copy Before:=Workbooks(wbname & ".xlsx").Sheets(1) Sheets(1).Name = wb1name '复制第2场考试成绩排名到基础表中 Windows(wb2name & ".xls").Activate Sheets(sht1name).Select Sheets(sht1name).Copy Before:=Workbooks(wbname & ".xlsx").Sheets(1) Sheets(1).Name = wb2name '复制配置表内容到基础表中 Windows(wb3name & ".xlsx").Activate Sheets(sht3name).Select Sheets(sht3name).Copy After:=Workbooks(wbname & ".xlsx").Sheets(2) Sheets(3).Name = sht3name Windows(wb3name & ".xlsx").Activate Sheets(sht4name).Select Sheets(sht4name).Copy After:=Workbooks(wbname & ".xlsx").Sheets(3) Sheets(4).Name = sht4name '删除没啥用的表“1”
+    Application.DisplayAlerts = False
+    Sheets("1").Delete
+
+'调整表顺序
+    Sheets(wb1name).Select
+    Sheets(wb1name).Move Before:=Sheets(wb2name)
+'关闭考试1表
+    Windows(wb1name & ".xls").Activate
+    ActiveWorkbook.Close savechanges:=False
+'关闭考试2表
+    Windows(wb2name & ".xls").Activate
+    ActiveWorkbook.Close savechanges:=False
+'关闭配置表
+    Windows(wb3name & ".xlsx").Activate
+    ActiveWorkbook.Close savechanges:=False
+    
+'删除标题行
+    Windows(wbname & ".xlsx").Activate
+    Sheets(wb1name).Select
+    Rows("1:2").Select
+    Selection.Delete Shift:=xlUp
+    Sheets(wb2name).Select
+    Rows("1:2").Select
+    Selection.Delete Shift:=xlUp
+    
+'生成学生明细表
+    Sheets(wb1name).Copy After:=Sheets(2)
+    Sheets(3).Name = sht2name
+
+    
+'求最大行数
+    Windows(wbname & ".xlsx").Activate
+    Sheets(sht2name).Select
+    rowmax = ActiveSheet.UsedRange.Rows.Count
+    
+'删除学生明细表第5列的期中考试班级排名
+    Columns("E:E").Select
+    Selection.Delete Shift:=xlToLeft
+
+'插入评判标准信息
+    '插入：文理科、分层、进步标准、退步标准空白列
+    For i = 1 To 4
+        Columns("D:D").Select
+        Selection.Insert Shift:=xlToRight
+    Next
+    '重命名列标题并匹配信息
+    Range("D1").Select
+    ActiveCell.FormulaR1C1 = "文理科"
+    Sheets("学生明细表").Range("D2:D" & rowmax).Formula = "=VLOOKUP(C2,班级属性!A:E,2,FALSE)"
+    Range("E1").Select
+    ActiveCell.FormulaR1C1 = "分层"
+    Sheets("学生明细表").Range("E2:E" & rowmax).Formula = "=VLOOKUP(C2,班级属性!A:E,3,FALSE)"
+    Range("F1").Select
+    ActiveCell.FormulaR1C1 = "进步标准"
+    Sheets("学生明细表").Range("F2:F" & rowmax).Formula = "=VLOOKUP(C2,班级属性!A:E,4,FALSE)"
+    Range("G1").Select
+    ActiveCell.FormulaR1C1 = "退步标准"
+    Sheets("学生明细表").Range("G2:G" & rowmax).Formula = "=VLOOKUP(C2,班级属性!A:E,5,FALSE)"
+'完善总分组内容
+    '插入总分空白列
+    For i = 1 To 1
+        Columns(9).Select   '这是列I
+        Selection.Insert Shift:=xlToRight
+    Next
+    For i = 1 To 4
+        Columns(11).Select  '这是列L
+        Selection.Insert Shift:=xlToRight
+    Next
+'重命名列标题并匹配信息
+    Range("H1").Select
+    ActiveCell.FormulaR1C1 = "期中总分"
+    Range("I1").Select
+    ActiveCell.FormulaR1C1 = "期末总分"
+    Sheets("学生明细表").Range("I2:I" & rowmax).Formula = "=VLOOKUP(A2,期末!A:Z,4,FALSE)"
+    Range("J1").Select
+    ActiveCell.FormulaR1C1 = "期中总分级次"
+    Range("K1").Select
+    ActiveCell.FormulaR1C1 = "期末总分级次"
+    Sheets("学生明细表").Range("K2:K" & rowmax).Formula = "=VLOOKUP(A2,期末!A:Z,6,FALSE)"
+    Range("L1").Select
+    ActiveCell.FormulaR1C1 = "总分进退步"
+    Sheets("学生明细表").Range("L2:L" & rowmax).Formula = "=K2-J2"
+    Range("M1").Select
+    ActiveCell.FormulaR1C1 = "总分是否进步"
+    Sheets("学生明细表").Range("M2:M" & rowmax).Formula = "=IF(AND(L2>0,ABS(L2)>$F2),1,0)"
+    Range("N1").Select
+    ActiveCell.FormulaR1C1 = "总分是否退步"
+    Sheets("学生明细表").Range("N2:N" & rowmax).Formula = "=IF(AND(L2<0,ABS(L2)>$G2),1,0)"
+
+For x = 1 To 9
+
+ For i = 1 To 1
+        Columns(Start + 2).Select
+        Selection.Insert Shift:=xlToRight
+    Next
+    For i = 1 To 4
+        Columns(Start + 4).Select
+        Selection.Insert Shift:=xlToRight
+    Next
+'重命名列标题并匹配信息  
+    Range(STR(Start) & "1").Select
+    ActiveCell.FormulaR1C1 = S(N) & "期中总分"
+    Range(STR(Start + 1) & "1").Select
+    ActiveCell.FormulaR1C1 = S(N) & "期末总分"
+    Sheets("学生明细表").Range(STR(Start + 1) & "2:" & STR(Start + 1) & rowmax).Formula = "=VLOOKUP(A2,期末!A:Z," & v & ",FALSE)"
+    Range(STR(Start + 2) & "1").Select
+    ActiveCell.FormulaR1C1 = S(N) & "期中总分级次"
+    Range(STR(Start + 3) & "1").Select
+    ActiveCell.FormulaR1C1 = S(N) & "期末总分级次"
+    Sheets("学生明细表").Range(STR(Start + 3) & "2:" & STR(Start + 3) & rowmax).Formula = "=VLOOKUP(A2,期末!A:Z," & w & ",FALSE)"
+    Range(STR(Start + 4) & "1").Select
+    ActiveCell.FormulaR1C1 = S(N) & "总分进退步"
+    Sheets("学生明细表").Range(STR(Start + 4) & "2:" & STR(Start + 4) & rowmax).Formula = "=" & STR(Start + 3) & "2-" & STR(Start + 2) & "2"
+    Range(STR(Start + 5) & "1").Select
+    ActiveCell.FormulaR1C1 = S(N) & "总分是否进步"
+    Sheets("学生明细表").Range(STR(Start + 5) & "2:" & STR(Start + 5) & rowmax).Formula = "=IF(AND(" & STR(Start + 4) & "2>0,ABS(" & STR(Start + 4) & "2)>$F2),1,0)"
+    Range(STR(Start + 6) & "1").Select
+    ActiveCell.FormulaR1C1 = S(N) & "总分是否退步"
+    Sheets("学生明细表").Range(STR(Start + 6) & "2:" & STR(Start + 6) & rowmax).Formula = "=IF(AND(" & STR(Start + 4) & "2<0,ABS(" & STR(Start + 4) & "2)>$G2),1,0)"
+
+    Start = Start + 7
+    N = N + 1
+    v = v + 2
+    w = w + 2
+Next
+
+    '完结撒花！*★,°*:.☆\(￣▽￣)/$:*.°★* 。
+    MsgBox "基础表整理完成！ヾ(*′▽｀*)ノ彡☆ "
+
+End Sub
+
+
+
+
+

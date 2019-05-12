@@ -1,0 +1,89 @@
+Sub 宏1()
+'
+' 宏1 宏
+'
+
+'
+    Windows("基础表.xlsx").Activate
+    Range("A4:C13").Select
+    Selection.Copy
+    Windows("汇文初二考试对比.xlsx").Activate
+    Range("B31").Select
+    ActiveSheet.Paste
+    Range("B31:D31").Select
+    Application.CutCopyMode = False
+    Selection.Cut
+    ActiveWindow.SmallScroll Down:=12
+    Range("B41").Select
+    ActiveSheet.Paste
+    Range("C32:D41").Select
+    Selection.Copy
+    ActiveWindow.SmallScroll Down:=-15
+    Range("C4").Select
+    Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
+    Range("B3:D13").Select
+    ActiveSheet.Shapes.AddChart2(201, xlColumnClustered).Select
+    ActiveChart.SetSourceData Source:=Range("全科!$B$3:$D$13")
+    ActiveChart.ChartTitle.Select
+    ActiveChart.ChartTitle.Text = "图1  全科各班进退步人数"
+    Selection.Format.TextFrame2.TextRange.Characters.Text = "图1  全科各班进退步人数"
+    With Selection.Format.TextFrame2.TextRange.Characters(1, 13).ParagraphFormat
+        .TextDirection = msoTextDirectionLeftToRight
+        .Alignment = msoAlignCenter
+    End With
+    With Selection.Format.TextFrame2.TextRange.Characters(1, 1).Font
+        .BaselineOffset = 0
+        .Bold = msoFalse
+        .NameComplexScript = "+mn-cs"
+        .NameFarEast = "+mn-ea"
+        .Fill.Visible = msoTrue
+        .Fill.ForeColor.RGB = RGB(89, 89, 89)
+        .Fill.Transparency = 0
+        .Fill.Solid
+        .Size = 14
+        .Italic = msoFalse
+        .Kerning = 12
+        .Name = "+mn-lt"
+        .UnderlineStyle = msoNoUnderline
+        .Spacing = 0
+        .Strike = msoNoStrike
+    End With
+    With Selection.Format.TextFrame2.TextRange.Characters(2, 3).Font
+        .BaselineOffset = 0
+        .Bold = msoFalse
+        .NameComplexScript = "+mn-cs"
+        .NameFarEast = "+mn-ea"
+        .Fill.Visible = msoTrue
+        .Fill.ForeColor.RGB = RGB(89, 89, 89)
+        .Fill.Transparency = 0
+        .Fill.Solid
+        .Size = 14
+        .Italic = msoFalse
+        .Kerning = 12
+        .Name = "+mn-lt"
+        .UnderlineStyle = msoNoUnderline
+        .Spacing = 0
+        .Strike = msoNoStrike
+    End With
+    With Selection.Format.TextFrame2.TextRange.Characters(5, 9).Font
+        .BaselineOffset = 0
+        .Bold = msoFalse
+        .NameComplexScript = "+mn-cs"
+        .NameFarEast = "+mn-ea"
+        .Fill.Visible = msoTrue
+        .Fill.ForeColor.RGB = RGB(89, 89, 89)
+        .Fill.Transparency = 0
+        .Fill.Solid
+        .Size = 14
+        .Italic = msoFalse
+        .Kerning = 12
+        .Name = "+mn-lt"
+        .UnderlineStyle = msoNoUnderline
+        .Spacing = 0
+        .Strike = msoNoStrike
+    End With
+    Range("B32:D41").Select
+    Application.CutCopyMode = False
+    Selection.ClearContents
+End Sub
