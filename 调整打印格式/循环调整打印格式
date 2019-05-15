@@ -1,0 +1,16 @@
+Sub 循环调整()
+
+Dim myPath$, myFile$, AK As Workbook
+myPath = "D:\会通\初2017级学生成绩跟踪分析\新建文件夹\1\" '把文件路径定义给变量
+myFile = Dir(myPath & "*.xls") '依次找寻指定路径中的*.xls文件
+Do While myFile <> "" '当指定路径中有文件时进行循环
+If myFile <> ThisWorkbook.Name Then
+Set AK = Workbooks.Open(myPath & myFile) '打开符合要求的文件
+End If
+    ActiveWindow.View = xlPageBreakPreview
+    Set ActiveSheet.VPageBreaks(1).Location = Range("T1")'这得判断一下，如果是一页就不同调整了
+    ActiveWindow.View = xlNormalView
+ActiveWorkbook.Close savechanges:=False'关闭excel不保存
+myFile = Dir '找寻下一个*.xls文件
+Loop
+End Sub
