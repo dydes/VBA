@@ -1,16 +1,46 @@
 Sub 循环调整()
 
-Dim myPath$, myFile$, AK As Workbook
-myPath = "D:\会通\初2017级学生成绩跟踪分析\新建文件夹\1\" '把文件路径定义给变量
-myFile = Dir(myPath & "*.xls") '依次找寻指定路径中的*.xls文件
+'定义变量
+Dim myPath$, myFile$, AK As Workbook, n As Integer, f, m As Integer
+
+'选择文件夹（此处选择到工作簿所在文件夹的父文件夹，就是1-10班的上一层）
+With Application.FileDialog(msoFileDialogFolderPicker)
+    If .Show = False Then Exit Sub
+    myPath = .SelectedItems(1) & "\"
+End With
+
+'计算该文件夹下有多少个子文件夹（这里由于是用文件夹名拼接路径了，所以文件夹名得是数字，从1开始，要连续，会影响for循环）
+m = range("B4").value
+
+'开始循环文件夹
+For i = 1 To m '这里待会换成变量
+'计算该文件夹下有多少个xls文件
+n = 0
+f = Dir(myPath & i & "\*.xls*")
+While f <> ""
+    n = n + 1
+    f = Dir
+Wend
+'报文件个数
+MsgBox myPath & i & vbCrLf & "文件夹中总共有" & n & "个excel文件"
+
+'遍历文件夹下所有xls文件
+myFile = Dir(myPath & i & "\*.xls") '依次找寻指定路径中的*.xls文件
 Do While myFile <> "" '当指定路径中有文件时进行循环
 If myFile <> ThisWorkbook.Name Then
-Set AK = Workbooks.Open(myPath & myFile) '打开符合要求的文件
+Set AK = Workbooks.Open(myPath & i & "\" & myFile) '打开符合要求的文件
 End If
+    '调整打印区域
     ActiveWindow.View = xlPageBreakPreview
-    Set ActiveSheet.VPageBreaks(1).Location = Range("T1")'这得判断一下，如果是一页就不同调整了
+        If ActiveSheet.VPageBreaks.Count > 0 Then
+            ActiveSheet.VPageBreaks(1).DragOff Direction:=xlToRight, RegionIndex:=1
+        End If '判断了一下，如果是一页就不调整了
     ActiveWindow.View = xlNormalView
-ActiveWorkbook.Close savechanges:=False'关闭excel不保存
+'保存变更
+ActiveWorkbook.Save
+ActiveWorkbook.Close savechanges:=False '关闭excel不保存
 myFile = Dir '找寻下一个*.xls文件
 Loop
+Next '下一个文件夹
+MsgBox "调整完成"
 End Sub
