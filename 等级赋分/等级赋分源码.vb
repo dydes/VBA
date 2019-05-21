@@ -3,7 +3,7 @@ Sub 生成全科等级赋分表()
 '定义变量
     Dim title As String, subTitle As String, rowmax As Integer
 
---------------------------
+'--------------------------先选择文件，获取路径
 Dim strFolder As String
     '差异：msoFileDialogFilePicker
     With Application.FileDialog(msoFileDialogFilePicker)
@@ -19,7 +19,9 @@ Dim strFolder As String
             strFolder= .SelectedItems(1)
         End If
     End With
------------------------------------
+'-----------------------------------
+'然后打开指定的文件，判断一下有没有对应的sheet，如果有的话，开始操作
+'最后按班拆分成多个工作簿
 
 '选择文件获取文件路径
 With Application.FileDialog(msoFileDialogFolderPicker)
