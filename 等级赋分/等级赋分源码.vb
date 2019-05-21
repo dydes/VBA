@@ -3,6 +3,30 @@ Sub 生成全科等级赋分表()
 '定义变量
     Dim title As String, subTitle As String, rowmax As Integer
 
+--------------------------
+Dim strFolder As String
+    '差异：msoFileDialogFilePicker
+    With Application.FileDialog(msoFileDialogFilePicker)
+
+        '文件对话框的题目，根据个人情况进行设定
+        .Title = "Select File"
+
+        '默认打开的文件对话框路径，此处是d盘
+        .InitialFileName = "d:\"
+        If .Show Then
+
+            '获取到路径
+            strFolder= .SelectedItems(1)
+        End If
+    End With
+-----------------------------------
+
+'选择文件获取文件路径
+With Application.FileDialog(msoFileDialogFolderPicker)
+    If .Show = False Then Exit Sub
+    myPath = .SelectedItems(1) & "\"
+End With
+
 '临时存储标题（标题合并处理的话，目前有点问题，有待研究）
     Range("A1:Z2").Select
     Application.CutCopyMode = False
