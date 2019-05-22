@@ -1,33 +1,45 @@
 Sub 生成全科等级赋分表()
 
 '定义变量
-    Dim title As String, subTitle As String, rowmax As Integer
+    Dim title As String, subTitle As String, rowmax As Integer, file As String, fPath As String
 
-'--------------------------先选择文件，获取路径
-Dim strFolder As String
-    '差异：msoFileDialogFilePicker
-    With Application.FileDialog(msoFileDialogFilePicker)
-
-        '文件对话框的题目，根据个人情况进行设定
-        .Title = "Select File"
-
-        '默认打开的文件对话框路径，此处是d盘
-        .InitialFileName = "d:\"
-        If .Show Then
-
-            '获取到路径
-            strFolder= .SelectedItems(1)
-        End If
-    End With
-'-----------------------------------
-'然后打开指定的文件，判断一下有没有对应的sheet，如果有的话，开始操作
-'最后按班拆分成多个工作簿
-
-'选择文件获取文件路径
-With Application.FileDialog(msoFileDialogFolderPicker)
-    If .Show = False Then Exit Sub
-    myPath = .SelectedItems(1) & "\"
+'先选择文件，获取路径，若未选择任何文件，终止程序，选择的不是全年级-所有工作簿，终止程序
+With Application.FileDialog(msoFileDialogFilePicker)
+    .title = "请选择全年级文件夹下全科的工作簿"
+    .InitialFileName = "c:\"
+        If .Show Then
+            file = .SelectedItems(1)
+        Else: Exit Sub
+        End If
+        If Not file Like "*全年级-所有.xls" Then
+            MsgBox "此文件不是全年级全科工作簿"
+        End If
+        Exit Sub
 End With
+
+'选择要保存的文件路径，若未选择任何文件夹，终止程序
+With Application.FileDialog(msoFileDialogFolderPicker)
+    .title = "请选择要保存的文件夹"
+    .InitialFileName = "c:\"
+    If .Show = -1 Then
+        fPath = .SelectedItems(1)
+    Else: Exit Sub
+    End If
+End With
+
+'打开指定工作簿
+Workbooks.Open (file)
+
+'判断成绩排名工作表是否存在
+On Error Resume Next
+    rr = Sheets("成绩排名").Cells(1, 1)
+    If Err <> Empty Then
+        MsgBox "成绩排名工作表不存在"
+        Windows(file).Activate
+        ActiveWorkbook.Close savechanges:=False
+    End If
+    Exit Sub
+On Error GoTo 0
 
 '临时存储标题（标题合并处理的话，目前有点问题，有待研究）
     Range("A1:Z2").Select
@@ -394,7 +406,9 @@ End With
     Sheets("全科").Select
     ActiveSheet.Shapes.Range(Array("Button 29")).Select
     Selection.Delete
-    
+
+'最后按班拆分成多个工作簿
+
 '完成提示
     MsgBox "生成完成"
     
