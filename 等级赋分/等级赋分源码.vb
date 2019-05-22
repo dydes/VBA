@@ -1,7 +1,7 @@
 Sub 生成全科等级赋分表()
 
 '定义变量
-    Dim title As String, subTitle As String, rowmax As Integer, file As String, fPath As String
+    Dim title As String, subTitle As String, rowmax As Integer, file As String, fPath As String, splfile As Variant, fName As String, grade As String
 
 '先选择文件，获取路径，若未选择任何文件，终止程序，选择的不是全年级-所有工作簿，终止程序
 With Application.FileDialog(msoFileDialogFilePicker)
@@ -11,11 +11,11 @@ With Application.FileDialog(msoFileDialogFilePicker)
             file = .SelectedItems(1)
         Else: Exit Sub
         End If
-        If Not file Like "*全年级-所有.xls" Then
-            MsgBox "此文件不是全年级全科工作簿"
-        End If
-        Exit Sub
 End With
+
+'用斜杠分割文件路径，创建数组，选取数组最后一个元素做为不含路径的文件名
+splfile = Split(file, "\")
+fName = splfile(UBound(splfile))
 
 '选择要保存的文件路径，若未选择任何文件夹，终止程序
 With Application.FileDialog(msoFileDialogFolderPicker)
@@ -30,16 +30,20 @@ End With
 '打开指定工作簿
 Workbooks.Open (file)
 
-'判断成绩排名工作表是否存在
-On Error Resume Next
-    rr = Sheets("成绩排名").Cells(1, 1)
-    If Err <> Empty Then
-        MsgBox "成绩排名工作表不存在"
-        Windows(file).Activate
-        ActiveWorkbook.Close savechanges:=False
-    End If
-    Exit Sub
-On Error GoTo 0
+'选择成绩排名工作表，复制并新建文件，保存新文件，关闭源文件
+Windows(fName).Activate
+    Sheets("成绩排名").Select
+    Sheets("成绩排名").Copy
+ChDir fPath
+    ActiveWorkbook.SaveAs Filename:=fPath & "\全年级-全科.xlsx", FileFormat:= _
+    xlOpenXMLWorkbook, CreateBackup:=False
+Windows(fName).Activate
+    ActiveWorkbook.Close savechanges:=False
+
+'开始处理成绩排名工作表
+grade = "全年级-全科.xlsx"
+Windows(grade).Activate
+Sheets("成绩排名").Select
 
 '临时存储标题（标题合并处理的话，目前有点问题，有待研究）
     Range("A1:Z2").Select
@@ -126,12 +130,16 @@ On Error GoTo 0
     Range("Z1:AK1") = Array("历史原始分", "年级排名", "历史等级", "历史赋分", "地理原始分", "年级排名", "地理等级", "地理赋分", "政治原始分", "年级排名", "政治等级", "政治赋分")
     Range("AL1:AM1") = Array("语数外总分", "年级排名")
     
-'替换--
+'替横线向--
     Columns("A:A").Select
     Range(Selection, Selection.End(xlToRight)).Select
     Selection.Replace What:="--", Replacement:="", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
+
+'工作表改名
+    Sheets("成绩排名").Select
+    Sheets("成绩排名").Name = "全科"
 
 '计算等级及赋分
     rowmax = ActiveSheet.UsedRange.Rows.Count
@@ -181,10 +189,10 @@ On Error GoTo 0
         .TintAndShade = 0.799981688894314
         .PatternTintAndShade = 0
     End With
-	
+    
 '计算赋分年级排名
-	Sheets("全科").Range("H2:H" & rowmax).Formula = "=RANK.EQ(E2,E:E,0)"
-	
+    Sheets("全科").Range("H2:H" & rowmax).Formula = "=RANK.EQ(E2,E:E,0)"
+    
 '赋分列排名粘贴为死数
     Columns("H:H").Select
     Selection.Copy
@@ -192,9 +200,9 @@ On Error GoTo 0
         , SkipBlanks:=False, Transpose:=False
     Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
         :=False, Transpose:=False
-		
+        
 '按赋分年级排名排序
-	Columns("H:H").Select
+    Columns("H:H").Select
     ActiveWorkbook.Worksheets("全科").Sort.SortFields.Add2 Key:=Range("H1"), _
         SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("全科").Sort
@@ -315,45 +323,46 @@ On Error GoTo 0
         :=False, Transpose:=False
 
 '设置打印格式
-    '所有表自适应宽度
-	For i = 1 To 10 Step 1
+    '循环选中工作表
+    For i = 1 To 10 Step 1
     Sheets(i).Select
-    Columns("A:A").Select
-    Range(Selection, Selection.End(xlToRight)).Select
-    Columns("A:L").EntireColumn.AutoFit
-    Range("A1").Select
-    Range(Selection, Selection.End(xlToRight)).Select
-    With Selection.Interior
-        .Pattern = xlSolid
-        .PatternColorIndex = xlAutomatic
-        .ThemeColor = xlThemeColorAccent5
-        .TintAndShade = 0.799981688894314
-        .PatternTintAndShade = 0
-    End With
-		'隔行标色
-		For j = 3 To rowmax Step 2
-		    Rows(j).Select
-			With Selection.Interior
-				.Pattern = xlSolid
-				.PatternColorIndex = xlAutomatic
-				.ThemeColor = xlThemeColorDark1
-				.TintAndShade = -4.99893185216834E-02
-				.PatternTintAndShade = 0
-			End With
-		next
+        '自适应各列
+        Columns("A:A").Select
+        Range(Selection, Selection.End(xlToRight)).Select
+        Columns("A:L").EntireColumn.AutoFit
+        Range("A1").Select
+        Range(Selection, Selection.End(xlToRight)).Select
+        With Selection.Interior
+            .Pattern = xlSolid
+            .PatternColorIndex = xlAutomatic
+            .ThemeColor = xlThemeColorAccent5
+            .TintAndShade = 0.799981688894314
+            .PatternTintAndShade = 0
+        End With
+        '隔行标色
+        For j = 3 To rowmax Step 2
+            Rows(j).Select
+            With Selection.Interior
+                .Pattern = xlSolid
+                .PatternColorIndex = xlAutomatic
+                .ThemeColor = xlThemeColorDark1
+                .TintAndShade = -4.99893185216834E-02
+                .PatternTintAndShade = 0
+            End With
+        Next
     Next
-	
+
     '设置打印区域
-	For i = 1 To 10 Step 1
+    For i = 1 To 10 Step 1
     Sheets(i).Select
     ActiveWindow.View = xlPageBreakPreview
     ActiveWindow.View = xlPageBreakPreview
     ActiveSheet.VPageBreaks(1).DragOff Direction:=xlToRight, RegionIndex:=1
     ActiveWindow.View = xlNormalView
     Next
-	
+    
     '全科调整列宽
-	Sheets("全科").Select
+    Sheets("全科").Select
     Columns("D:D").Select
     Range(Selection, Selection.End(xlToRight)).Select
     Selection.ColumnWidth = 5
@@ -370,11 +379,11 @@ On Error GoTo 0
         .ReadingOrder = xlContext
         .MergeCells = False
     End With
-	
+    
 '赋分排名列标题标色
-	For i = 1 To 4 Step 1
+    For i = 1 To 4 Step 1
     Sheets(i).Select
-	Range("H1").Select
+    Range("H1").Select
     With Selection.Interior
         .Pattern = xlSolid
         .PatternColorIndex = xlAutomatic
@@ -382,10 +391,10 @@ On Error GoTo 0
         .TintAndShade = 0
         .PatternTintAndShade = 0
     End With
-	Next
-	For i = 5 To 10 Step 1
+    Next
+    For i = 5 To 10 Step 1
     Sheets(i).Select
-	Range("H1,K1,L1").Select
+    Range("H1,K1,L1").Select
     With Selection.Interior
         .Pattern = xlSolid
         .PatternColorIndex = xlAutomatic
@@ -393,25 +402,19 @@ On Error GoTo 0
         .TintAndShade = 0
         .PatternTintAndShade = 0
     End With
-	Next
+    Next
 
 '冻结窗口
-	For i = 1 to 10 step 1
-	Sheets(i).Select
-	Range("D2").Select
+    For i = 1 To 10 Step 1
+    Sheets(i).Select
+    Range("D2").Select
     ActiveWindow.FreezePanes = True
-	Next
-	
-'删除按钮
-    Sheets("全科").Select
-    ActiveSheet.Shapes.Range(Array("Button 29")).Select
-    Selection.Delete
-
+    Next
+    
 '最后按班拆分成多个工作簿
 
 '完成提示
+ActiveWorkbook.Save
     MsgBox "生成完成"
     
 End Sub
-
-
