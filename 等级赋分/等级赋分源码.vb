@@ -356,8 +356,9 @@ Sheets("成绩排名").Select
     For i = 1 To 10 Step 1
     Sheets(i).Select
     ActiveWindow.View = xlPageBreakPreview
-    ActiveWindow.View = xlPageBreakPreview
-    ActiveSheet.VPageBreaks(1).DragOff Direction:=xlToRight, RegionIndex:=1
+    If ActiveSheet.VPageBreaks.Count > 0 Then
+            ActiveSheet.VPageBreaks(1).DragOff Direction:=xlToRight, RegionIndex:=1
+        End If '判断了一下，如果是一页就不调整了
     ActiveWindow.View = xlNormalView
     Next
     
