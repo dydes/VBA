@@ -4,11 +4,11 @@ Sub 工资计算()
     Dim splfile As Variant, fName As String, fPath As String, file As String
     Dim dat As String, tim As String, tim1 As String, tim2 As String
     Dim rowmax As Integer, rowmax1 As Integer, rowmax2 As Integer, rowmax3 As Integer, rowmax4 As Integer
-    Dim early As double, later As double, man_hour As double, fee_per_day As double, fee_per_hour As double
+    Dim pid1 As double, pid2 As double, man_hour As double, fee_per_day As double, fee_per_hour As double
 
 '读取配置
-    early = Sheets("说明").Range("B2").value
-    later = Sheets("说明").Range("B3").value
+    pid1 = Sheets("说明").Range("B2").value
+    pid2 = Sheets("说明").Range("B3").value
     man_hour = Sheets("说明").Range("B4").value
     fee_per_day = Sheets("说明").Range("B5").value
     fee_per_hour = Sheets("说明").Range("B6").value
@@ -64,13 +64,13 @@ Sub 工资计算()
     Columns("B:C").Select
     Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
 
-'插入“早来”、“晚走”、“时间差”、“实际工时”4列
+'插入“来时段”、“走时段”、“时间差”、“实际工时”4列
     Columns("N:Q").Select
     Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
     
 '合并单元格、填充标题、标色
     Merge_list = Array("B", "C", "N", "O", "P", "Q")
-    Title = Array("计费方式", "key", "早来", "晚走", "时间差", "实际工时")
+    Title = Array("计费方式", "key", "来时段", "走时段", "时间差", "实际工时")
     h = LBound(Merge_list)
     For Each i In Merge_list
         Range(Cells(1, i), Cells(2, i)).Merge
@@ -127,13 +127,13 @@ Sub 工资计算()
 
 '判断是否有空值，是否有“次日 ”
 
-'判断是否早来晚走、计算时间差、实际工时、判断计费方式、拼接人员计费类型
+'判断来时段、走时段、计算时间差、实际工时、判断计费方式、拼接人员计费类型
     Sheets("每日统计").Range("B3:B" & rowmax).Formula = "=IF(Q3>=" & man_hour & ",1,2)"
     Sheets("每日统计").Range("C3:C" & rowmax).Formula = "=A3&B3"
-    Sheets("每日统计").Range("N3:N" & rowmax).Formula = "=IF(AND(J3<>"""",(HOUR(J3)+MINUTE(J3)/60)<=" & early & "),1,0)"
-    Sheets("每日统计").Range("O3:O" & rowmax).Formula = "=IF(AND(L3<>"""",(HOUR(L3)+MINUTE(L3)/60)>=" & later & "),1,0)"
+    Sheets("每日统计").Range("N3:N" & rowmax).Formula = "=IF(J3="""",0,IF((HOUR(J3)+MINUTE(J3)/60)<="& pid1 &",1,IF(AND((HOUR(J3)+MINUTE(J3)/60)>"& pid1 &",(HOUR(J3)+MINUTE(J3)/60)<="& pid2 &"),2,3)))"
+    Sheets("每日统计").Range("O3:O" & rowmax).Formula = "=IF(L3="""",0,IF((HOUR(L3)+MINUTE(L3)/60)<="& pid1 &",1,IF(AND((HOUR(L3)+MINUTE(L3)/60)>"& pid1 &",(HOUR(L3)+MINUTE(L3)/60)<="& pid2 &"),2,3)))"
     Sheets("每日统计").Range("P3:P" & rowmax).Formula = "=value(Text((HOUR(L3)+MINUTE(L3)/60)-(HOUR(J3)+MINUTE(J3)/60),""0.0""))"
-    Sheets("每日统计").Range("Q3:Q" & rowmax).Formula = "=value(IF(AND(N3=1,O3=1),Text(P3-2,""0.0""),IF(AND(N3=0,O3=0),Text(P3,""0.0""),Text(P3-1,""0.0""))))"
+    Sheets("每日统计").Range("Q3:Q" & rowmax).Formula = "=VALUE(TEXT(IF(N3&O3=""11"",P3,IF(N3&O3=""12"",P3-1,IF(N3&O3=""13"",P3-2,IF(N3&O3=""22"",P3,IF(N3&O3=""23"",P3-1,IF(N3&O3=""33"",P3,0)))))),""0.0""))"
 
 '创建两个工作表
     Sheets.Add After:=ActiveSheet
