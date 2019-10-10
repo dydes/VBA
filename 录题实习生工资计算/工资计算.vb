@@ -131,7 +131,7 @@ Sub 工资计算()
     Sheets("每日统计").Range("B3:B" & rowmax).Formula = "=IF(Q3>=" & man_hour & ",1,2)"
     Sheets("每日统计").Range("C3:C" & rowmax).Formula = "=A3&B3"
     Sheets("每日统计").Range("N3:N" & rowmax).Formula = "=IF(J3="""",0,IF((HOUR(J3)+MINUTE(J3)/60)<="& pid1 &",1,IF(AND((HOUR(J3)+MINUTE(J3)/60)>"& pid1 &",(HOUR(J3)+MINUTE(J3)/60)<="& pid2 &"),2,3)))"
-    Sheets("每日统计").Range("O3:O" & rowmax).Formula = "=IF(L3="""",0,IF((HOUR(L3)+MINUTE(L3)/60)<="& pid1 &",1,IF(AND((HOUR(L3)+MINUTE(L3)/60)>"& pid1 &",(HOUR(L3)+MINUTE(L3)/60)<="& pid2 &"),2,3)))"
+    Sheets("每日统计").Range("O3:O" & rowmax).Formula = "=IF(L3="""",0,IF((HOUR(L3)+MINUTE(L3)/60)<=12,1,IF(AND((HOUR(L3)+MINUTE(L3)/60)>12,(HOUR(L3)+MINUTE(L3)/60)<="& pid2 &"),2,3)))"
     Sheets("每日统计").Range("P3:P" & rowmax).Formula = "=value(Text((HOUR(L3)+MINUTE(L3)/60)-(HOUR(J3)+MINUTE(J3)/60),""0.0""))"
     Sheets("每日统计").Range("Q3:Q" & rowmax).Formula = "=VALUE(TEXT(IF(N3&O3=""11"",P3,IF(N3&O3=""12"",P3-1,IF(N3&O3=""13"",P3-2,IF(N3&O3=""22"",P3,IF(N3&O3=""23"",P3-1,IF(N3&O3=""33"",P3,0)))))),""0.0""))"
 
