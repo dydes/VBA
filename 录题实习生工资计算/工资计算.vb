@@ -4,14 +4,15 @@ Sub 工资计算()
     Dim splfile As Variant, fName As String, fPath As String, file As String
     Dim dat As String, tim As String, tim1 As String, tim2 As String
     Dim rowmax As Integer, rowmax1 As Integer, rowmax2 As Integer, rowmax3 As Integer, rowmax4 As Integer
-    Dim pid1 As double, pid2 As double, man_hour As double, fee_per_day As double, fee_per_hour As double
+    Dim pid1 As double, pid2 As double, lunch_time As double, man_hour As double, fee_per_day As double, fee_per_hour As double
 
 '读取配置
     pid1 = Sheets("说明").Range("B2").value
     pid2 = Sheets("说明").Range("B3").value
-    man_hour = Sheets("说明").Range("B4").value
-    fee_per_day = Sheets("说明").Range("B5").value
-    fee_per_hour = Sheets("说明").Range("B6").value
+    lunch_time = Sheets("说明").Range("B4").value
+    man_hour = Sheets("说明").Range("B5").value
+    fee_per_day = Sheets("说明").Range("B6").value
+    fee_per_hour = Sheets("说明").Range("B7").value
 
 '先选择文件，获取路径，若未选择任何文件，终止程序
     With Application.FileDialog(msoFileDialogFilePicker)
@@ -131,7 +132,7 @@ Sub 工资计算()
     Sheets("每日统计").Range("B3:B" & rowmax).Formula = "=IF(Q3>=" & man_hour & ",1,2)"
     Sheets("每日统计").Range("C3:C" & rowmax).Formula = "=A3&B3"
     Sheets("每日统计").Range("N3:N" & rowmax).Formula = "=IF(J3="""",0,IF((HOUR(J3)+MINUTE(J3)/60)<="& pid1 &",1,IF(AND((HOUR(J3)+MINUTE(J3)/60)>"& pid1 &",(HOUR(J3)+MINUTE(J3)/60)<="& pid2 &"),2,3)))"
-    Sheets("每日统计").Range("O3:O" & rowmax).Formula = "=IF(L3="""",0,IF((HOUR(L3)+MINUTE(L3)/60)<=12,1,IF(AND((HOUR(L3)+MINUTE(L3)/60)>12,(HOUR(L3)+MINUTE(L3)/60)<="& pid2 &"),2,3)))"
+    Sheets("每日统计").Range("O3:O" & rowmax).Formula = "=IF(L3="""",0,IF((HOUR(L3)+MINUTE(L3)/60)<="& lunch_time &",1,IF(AND((HOUR(L3)+MINUTE(L3)/60)>"& lunch_time &",(HOUR(L3)+MINUTE(L3)/60)<="& pid2 &"),2,3)))"
     Sheets("每日统计").Range("P3:P" & rowmax).Formula = "=value(Text((HOUR(L3)+MINUTE(L3)/60)-(HOUR(J3)+MINUTE(J3)/60),""0.0""))"
     Sheets("每日统计").Range("Q3:Q" & rowmax).Formula = "=VALUE(TEXT(IF(N3&O3=""11"",P3,IF(N3&O3=""12"",P3-1,IF(N3&O3=""13"",P3-2,IF(N3&O3=""22"",P3,IF(N3&O3=""23"",P3-1,IF(N3&O3=""33"",P3,0)))))),""0.0""))"
 
