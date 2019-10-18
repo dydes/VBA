@@ -11,8 +11,8 @@ Sub 河南加权分()
 
 '先选择文件，获取路径，若未选择任何文件，终止程序
     With Application.FileDialog(msoFileDialogFilePicker)
-        .Title = "请选择工资文件"
-        .InitialFileName = "D:\会通\VBA\加权分\"
+        .Title = "请选择年级全科文件"
+        .InitialFileName = "D:\编程&数据分析\VBA\加权分\"
             If .Show Then
                 file = .SelectedItems(1)
             Else: Exit Sub
@@ -26,7 +26,7 @@ Sub 河南加权分()
 '选择要保存的文件路径，若未选择任何文件夹，终止程序
     With Application.FileDialog(msoFileDialogFolderPicker)
         .Title = "请选择要保存的文件夹"
-        .InitialFileName = "D:\会通\VBA\加权分\"
+        .InitialFileName = "D:\编程&数据分析\VBA\加权分\"
         If .Show = -1 Then
             fPath = .SelectedItems(1)
         Else: Exit Sub
@@ -58,7 +58,7 @@ Sub 河南加权分()
 
 '文本转数值格式
     colmax = ActiveSheet.UsedRange.Columns.Count
-    For i = 1 To 26
+    For i = 1 To colmax
     Cells(2, i).Select
     Range(Selection, Selection.End(xlDown)).Select
     Selection.TextToColumns Destination:=Cells(2, i), DataType:=xlDelimited, _
@@ -77,6 +77,7 @@ Sub 河南加权分()
         Columns(col_a + i).Select
         Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
     Next
+    col_c_Name = col_array(col_a - 1 - 1)
     col_a_Name = col_array(col_a - 1)
     col_a125_Name = col_array(col_a + 1 - 1)
     col_a_cr_Name = col_array(col_a + 2 - 1)
@@ -110,20 +111,68 @@ Sub 河南加权分()
 '创建科目数组
     subject_array = Array("语文", "数学", "英语加权", "物理", "化学", "生物", "历史", "地理", "政治")
     subject_col_array = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    Dim col_istrue As Range
     For i = 0 To 8
-        col_istrue = Rows("1:1").Find(What:=subject_array(i)).Column
-        If col_istrue > 0 Then
-        subject_col_array(i) = col_array(col_istrue - 1)'这一步得到了带列标的数组
+        Set col_istrue = Rows("1:1").Find(What:=subject_array(i))
+        If Not col_istrue Is Nothing Then
+            subject_col_array(i) = Split(col_istrue.Address, "$")(1)
         End If
     Next
+    
+'清洗科目数组，过滤掉不存在的列名，创建纯列名数组
+    col_isNotNull = Join(subject_col_array, ",")
+    col_isNotNull = Replace(col_isNotNull, "0,", "")
+    col_isNotNull = Replace(col_isNotNull, ",0", "")
+    col_isNotNull = Replace(col_isNotNull, "0", "")
+    col_isNotNull = Replace(col_isNotNull, ",,", ",")
+    subject_col_array = Split(col_isNotNull, ",")
 
 '计算加权总分及排名
+    For h = 2 To rowmax
+        a = 0
+        For Each i In subject_col_array
+            a = a + Cells(h, i).Value
+        Next
+        Range(col_a125_Name & h) = a
+    Next
+    Sheets("成绩排名").Range(col_a125_cr_Name & "2:" & col_a125_cr_Name & rowmax).Formula = "=SUMPRODUCT((" & col_c_Name & ":" & col_c_Name & "=" & col_c_Name & "192)*(" & col_a125_Name & ":" & col_a125_Name & ">" & col_a125_Name & "192))+1"
+    Sheets("成绩排名").Range(col_a125_gr_Name & "2:" & col_a125_gr_Name & rowmax).Formula = "=RANK(" & col_a125_Name & "2,$" & col_a125_Name & "$2:$" & col_a125_Name & "$" & rowmax & ",1)"
+
+'文本转数值格式
+    colmax = ActiveSheet.UsedRange.Columns.Count
+    For i = 1 To colmax
+    Cells(2, i).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.TextToColumns Destination:=Cells(2, i), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+        Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
+        :=Array(1, 1), TrailingMinusNumbers:=True
+    Next
     
+'调整行高列宽
+    Columns(col_c_Name & ":" & col_c_Name).ColumnWidth = 14
+    Rows("1:" & rowmax).EntireRow.AutoFit
+    
+'设置标题字体样式
+    Range("A1:" & col_array(colmax - 1) & "1").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+    Selection.Font.Bold = True
+
 '完成时间
     tim2 = Timer
     using_time = tim2 - tim1
     
 ActiveWindow.WindowState = xlMaximized
+ActiveWorkbook.Save
 MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
 
 End Sub
+
+
+
