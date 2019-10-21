@@ -12,7 +12,7 @@ Sub 河南加权分()
 '先选择文件，获取路径，若未选择任何文件，终止程序
     With Application.FileDialog(msoFileDialogFilePicker)
         .Title = "请选择年级全科文件"
-        .InitialFileName = "D:\编程&数据分析\VBA\加权分\"
+        .InitialFileName = "D:\会通\VBA\加权分\"
             If .Show Then
                 file = .SelectedItems(1)
             Else: Exit Sub
@@ -26,7 +26,7 @@ Sub 河南加权分()
 '选择要保存的文件路径，若未选择任何文件夹，终止程序
     With Application.FileDialog(msoFileDialogFolderPicker)
         .Title = "请选择要保存的文件夹"
-        .InitialFileName = "D:\编程&数据分析\VBA\加权分\"
+        .InitialFileName = "D:\会通\VBA\加权分\"
         If .Show = -1 Then
             fPath = .SelectedItems(1)
         Else: Exit Sub
@@ -53,8 +53,13 @@ Sub 河南加权分()
 
 '删除顶部1行
     Sheets("成绩排名").Select
-    Rows("1:1").Select
-    Selection.Delete Shift:=xlUp
+    If Range("A3").Value = "学生学号" Then
+        Rows("2:2").Select
+        Selection.Delete Shift:=xlUp
+    Else
+        Rows("1:1").Select
+        Selection.Delete Shift:=xlUp
+    End If
 
 '文本转数值格式
     colmax = ActiveSheet.UsedRange.Columns.Count
@@ -105,8 +110,20 @@ Sub 河南加权分()
 
 '计算英语学科加权分及排名
     rowmax = ActiveSheet.UsedRange.Rows.Count
-    Sheets("成绩排名").Range(col_e125_Name & "2:" & col_e125_Name & rowmax).Formula = "=ROUNDUP(IFERROR(" & col_e_Name & "2*1.25,0),1)"
-    Sheets("成绩排名").Range(col_e125_gr_Name & "2:" & col_e125_gr_Name & rowmax).Formula = "=RANK(" & col_e125_Name & "2,$" & col_e125_Name & "$2:$" & col_e125_Name & "$" & rowmax & ",1)"
+    Sheets("成绩排名").Range(col_e125_Name & "2:" & col_e125_Name & rowmax).Formula = "=ROUNDUP(IFERROR(" & col_e_Name & "2*1.25,0),0)"
+        Cells(2, col_e125_Name).Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.TextToColumns Destination:=Cells(2, col_e125_Name), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+        Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
+        :=Array(1, 1), TrailingMinusNumbers:=True
+    Sheets("成绩排名").Range(col_e125_gr_Name & "2:" & col_e125_gr_Name & rowmax).Formula = "=RANK(" & col_e125_Name & "2,$" & col_e125_Name & "$2:$" & col_e125_Name & "$" & rowmax & ",0)"
+        Cells(2, col_e125_gr_Name).Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.TextToColumns Destination:=Cells(2, col_e125_gr_Name), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+        Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
+        :=Array(1, 1), TrailingMinusNumbers:=True
 
 '创建科目数组
     subject_array = Array("语文", "数学", "英语加权", "物理", "化学", "生物", "历史", "地理", "政治")
@@ -135,34 +152,67 @@ Sub 河南加权分()
         Next
         Range(col_a125_Name & h) = a
     Next
-    Sheets("成绩排名").Range(col_a125_cr_Name & "2:" & col_a125_cr_Name & rowmax).Formula = "=SUMPRODUCT((" & col_c_Name & ":" & col_c_Name & "=" & col_c_Name & "192)*(" & col_a125_Name & ":" & col_a125_Name & ">" & col_a125_Name & "192))+1"
-    Sheets("成绩排名").Range(col_a125_gr_Name & "2:" & col_a125_gr_Name & rowmax).Formula = "=RANK(" & col_a125_Name & "2,$" & col_a125_Name & "$2:$" & col_a125_Name & "$" & rowmax & ",1)"
-
-'文本转数值格式
-    colmax = ActiveSheet.UsedRange.Columns.Count
-    For i = 1 To colmax
-    Cells(2, i).Select
-    Range(Selection, Selection.End(xlDown)).Select
-    Selection.TextToColumns Destination:=Cells(2, i), DataType:=xlDelimited, _
-        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
-        Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
-        :=Array(1, 1), TrailingMinusNumbers:=True
+    For m = 2 To rowmax
+        Sheets("成绩排名").Range(col_a125_cr_Name & m).Formula = "=SUMPRODUCT((" & col_c_Name & ":" & col_c_Name & "=" & col_c_Name & m & ")*(" & col_a125_Name & ":" & col_a125_Name & ">" & col_a125_Name & m & "))+1"
+            Range(col_a125_cr_Name & m).Select
+            Selection.Copy
+            Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+                :=False, Transpose:=False
     Next
+    Sheets("成绩排名").Range(col_a125_gr_Name & "2:" & col_a125_gr_Name & rowmax).Formula = "=RANK(" & col_a125_Name & "2,$" & col_a125_Name & "$2:$" & col_a125_Name & "$" & rowmax & ",1)"
+        Cells(2, col_a125_gr_Name).Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.TextToColumns Destination:=Cells(2, col_a125_gr_Name), DataType:=xlDelimited, _
+            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+            Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
+            :=Array(1, 1), TrailingMinusNumbers:=True
+
+'最大列及最大+1列列名
+    colmax = ActiveSheet.UsedRange.Columns.Count
+    colmaxN = col_array(colmax - 1)
+    colmaxN1 = col_array(colmax + 1 - 1)
+
+'成绩排名工作表添加班级辅助列并去重
+    Range(colmaxN1 & "2:" & colmaxN1 & rowmax).Value = Range("C2:C" & rowmax).Value
+    Range(colmaxN1 & "2:" & colmaxN1 & rowmax).RemoveDuplicates 1
+    cn = Application.CountA(Range(colmaxN1 & ":" & colmaxN1))
+
+'逐个取辅助列的值，命名新建sheet，复制内容
+    For k = 2 To cn
+        clName = Sheets("成绩排名").Range(colmaxN1 & k).Value
+        sheetNum = Sheets.Count
+        Sheets.Add after:=Sheets(sheetNum)
+        Sheets(sheetNum + 1).Name = clName
+        Sheets(sheetNum + 1).Range("A1:" & colmaxN & rowmax).Value = Sheets("成绩排名").Range("A1:" & colmaxN & rowmax).Value
+    Next
+ 
+'删除辅助列
+    Sheets("成绩排名").Select
+    Columns(colmaxN1 & ":" & colmaxN1).Select
+    Selection.Delete Shift:=xlToLeft
     
-'调整行高列宽
-    Columns(col_c_Name & ":" & col_c_Name).ColumnWidth = 14
-    Rows("1:" & rowmax).EntireRow.AutoFit
-    
-'设置标题字体样式
-    Range("A1:" & col_array(colmax - 1) & "1").Select
-    With Selection.Interior
-        .Pattern = xlSolid
-        .PatternColorIndex = xlAutomatic
-        .ThemeColor = xlThemeColorAccent5
-        .TintAndShade = 0.799981688894314
-        .PatternTintAndShade = 0
-    End With
-    Selection.Font.Bold = True
+'逐个调整行高列宽，设置标题字体样式
+    For s = 1 To sheetNum
+        Sheets(s).Select
+        Columns(col_c_Name & ":" & col_c_Name).ColumnWidth = 14
+        Rows("1:" & rowmax).EntireRow.AutoFit
+        Range("A1:" & col_array(colmax - 1) & "1").Select
+        With Selection.Interior
+            .Pattern = xlSolid
+            .PatternColorIndex = xlAutomatic
+            .ThemeColor = xlThemeColorAccent5
+            .TintAndShade = 0.799981688894314
+            .PatternTintAndShade = 0
+        End With
+        Selection.Font.Bold = True
+        '删除非本班学生成绩（这有问题）
+            For y = 2 To rowmax
+                If Cells(y, 3).Value <> ActiveSheet.Name Then
+                    Rows(y & ":" & y).Select
+                    Selection.Delete Shift:=xlUp
+                End If
+            Next
+    Next
 
 '完成时间
     tim2 = Timer
@@ -173,6 +223,4 @@ ActiveWorkbook.Save
 MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
 
 End Sub
-
-
 
