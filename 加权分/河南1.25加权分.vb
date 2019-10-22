@@ -51,7 +51,7 @@ Sub 河南加权分()
     Windows(fName).Activate
         ActiveWorkbook.Close savechanges:=False
 
-'删除顶部1行
+'删除顶部1或2行
     Sheets("成绩排名").Select
     If Range("A3").Value = "学生学号" Then
         Rows("2:2").Select
@@ -72,58 +72,88 @@ Sub 河南加权分()
         :=Array(1, 1), TrailingMinusNumbers:=True
     Next
 
-'列名转换数组
-    col_array = Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ")
-
-'查找并新增1.25分相关列
-'总分、总分班次、总分级次
+'加列
+    '查找并增加总分、总分班次、总分级次3列
     col_a = Rows("1:1").Find(What:="总分").Column
     For i = 1 To 5 Step 2
         Columns(col_a + i).Select
         Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
     Next
-    col_c_Name = col_array(col_a - 1 - 1)
-    col_a_Name = col_array(col_a - 1)
-    col_a125_Name = col_array(col_a + 1 - 1)
-    col_a_cr_Name = col_array(col_a + 2 - 1)
-    col_a125_cr_Name = col_array(col_a + 3 - 1)
-    col_a_gr_Name = col_array(col_a + 4 - 1)
-    col_a125_gr_Name = col_array(col_a + 5 - 1)
-    Range(col_a125_Name & "1") = "总分加权"
-    Range(col_a125_cr_Name & "1") = "加权班级排名"
-    Range(col_a125_gr_Name & "1") = "加权年级排名"
-
-
-'英语、英语级次
+    '查找并增加英语加权、英语加权年级排名2列
     col_e = Rows("1:1").Find(What:="英语").Column
     For i = 1 To 3 Step 2
         Columns(col_e + i).Select
         Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
     Next
-    col_e_Name = col_array(col_e - 1)
-    col_e125_Name = col_array(col_e + 1 - 1)
-    col_e_gr_Name = col_array(col_e + 2 - 1)
-    col_e125_gr_Name = col_array(col_e + 3 - 1)
-    Range(col_e125_Name & "1") = "英语加权"
-    Range(col_e125_gr_Name & "1") = "加权年级排名"
 
+'列标转换矩阵
+    '最大行列
+    colmax = ActiveSheet.UsedRange.Columns.Count
+    rowmax = ActiveSheet.UsedRange.Rows.Count
+    '列名转换数组
+    col_array = Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ")
+    '列号及列名
+    col_a125 = col_a + 1 '总分加权列号
+    col_a125_Name = col_array(col_a + 1 - 1) '总分加权列名
+
+    col_a125_cr = col_a + 3 '总分加权班级排名列号
+    col_a125_cr_Name = col_array(col_a + 3 - 1) '总分加权班级排名列名
+
+    col_a125_gr = col_a + 5 '总分加权年级排名列号
+    col_a125_gr_Name = col_array(col_a + 5 - 1) '总分加权年级排名列名
+
+    col_c_Name = col_array(col_a - 1 - 1) '总分班级名称列名
+    col_a_Name = col_array(col_a - 1) '总分列名
+    col_a_cr_Name = col_array(col_a + 2 - 1) '总分班级排名列名
+    col_a_gr_Name = col_array(col_a + 4 - 1) '总分年级排名列名
+
+    col_e125 = col_e + 1 '英语加权列号
+    col_e125_Name = col_array(col_e + 1 - 1) '英语加权列名
+
+    col_e125_gr = col_e + 3 '英语加权年级排名列号
+    col_e125_gr_Name = col_array(col_e + 3 - 1) '英语加权年级排名列名
+
+    col_e_Name = col_array(col_e - 1) '英语列号
+    col_e_gr_Name = col_array(col_e + 2 - 1) '英语列名
+
+    colmaxN = col_array(colmax - 1) '最大列名
+    colmaxN1 = col_array(colmax + 1 - 1) '最大+1列名
+    colmaxN2 = col_array(colmax + 2 - 1) '最大+2列名
+    colmaxN3 = col_array(colmax + 3 - 1) '最大+3列名
+    colmaxN4 = col_array(colmax + 4 - 1) '最大+4列名
+
+'命名表头
+    Cells(1, col_a125_Name) = "总分加权"
+    Cells(1, col_a125_cr) = "加权班级排名"
+    Cells(1, col_a125_gr) = "加权年级排名"
+    Cells(1, col_e125) = "英语加权"
+    Cells(1, col_e125_gr) = "加权年级排名"
 
 '计算英语学科加权分及排名
-    rowmax = ActiveSheet.UsedRange.Rows.Count
-    Sheets("成绩排名").Range(col_e125_Name & "2:" & col_e125_Name & rowmax).Formula = "=ROUNDUP(IFERROR(" & col_e_Name & "2*1.25,0),0)"
-        Cells(2, col_e125_Name).Select
-        Range(Selection, Selection.End(xlDown)).Select
-        Selection.TextToColumns Destination:=Cells(2, col_e125_Name), DataType:=xlDelimited, _
-        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
-        Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
-        :=Array(1, 1), TrailingMinusNumbers:=True
-    Sheets("成绩排名").Range(col_e125_gr_Name & "2:" & col_e125_gr_Name & rowmax).Formula = "=RANK(" & col_e125_Name & "2,$" & col_e125_Name & "$2:$" & col_e125_Name & "$" & rowmax & ",0)"
-        Cells(2, col_e125_gr_Name).Select
-        Range(Selection, Selection.End(xlDown)).Select
-        Selection.TextToColumns Destination:=Cells(2, col_e125_gr_Name), DataType:=xlDelimited, _
-        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
-        Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
-        :=Array(1, 1), TrailingMinusNumbers:=True
+    '计算英语加权分
+    For i = 2 To rowmax
+        Cells(i, col_e125).Value = Cells(i, col_e).Value * 1.25
+        Cells(i, col_e125).NumberFormatLocal = "0.0"
+    Next
+    '按加权分降序计算加权年级排名
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range(col_e125_Name & "2:" & col_e125_Name & rowmax) _
+        , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("成绩排名").Sort
+        .SetRange Range("A1:" & colmaxN & rowmax)
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    '计算年级排名
+    For i = 2 To rowmax
+        Cells(i, col_e125_gr) = Application.Rank(Cells(i, col_e125), Range(col_e125_Name & "2:" & col_e125_Name & rowmax))
+    Next
 
 '创建科目数组
     subject_array = Array("语文", "数学", "英语加权", "物理", "化学", "生物", "历史", "地理", "政治")
@@ -143,52 +173,94 @@ Sub 河南加权分()
     col_isNotNull = Replace(col_isNotNull, "0", "")
     col_isNotNull = Replace(col_isNotNull, ",,", ",")
     subject_col_array = Split(col_isNotNull, ",")
-
-'计算加权总分及排名
+    
+'计算加权总分
     For h = 2 To rowmax
         a = 0
         For Each i In subject_col_array
             a = a + Cells(h, i).Value
         Next
-        Range(col_a125_Name & h) = a
+        Cells(h, col_a125).Value = a
     Next
-    For m = 2 To rowmax
-        Sheets("成绩排名").Range(col_a125_cr_Name & m).Formula = "=SUMPRODUCT((" & col_c_Name & ":" & col_c_Name & "=" & col_c_Name & m & ")*(" & col_a125_Name & ":" & col_a125_Name & ">" & col_a125_Name & m & "))+1"
-            Range(col_a125_cr_Name & m).Select
-            Selection.Copy
-            Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-                :=False, Transpose:=False
+
+'计算加权总分及排名
+    '按总分加权降序排
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range(col_a125_Name & "2:" & col_a125_Name & rowmax) _
+        , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("成绩排名").Sort
+        .SetRange Range("A1:" & colmaxN & rowmax)
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    '计算总分加权年级排名
+    For i = 2 To rowmax
+        Cells(i, col_a125_gr) = Application.Rank(Cells(i, col_a125), Range(col_a125_Name & "2:" & col_a125_Name & rowmax))
     Next
-    Sheets("成绩排名").Range(col_a125_gr_Name & "2:" & col_a125_gr_Name & rowmax).Formula = "=RANK(" & col_a125_Name & "2,$" & col_a125_Name & "$2:$" & col_a125_Name & "$" & rowmax & ",1)"
-        Cells(2, col_a125_gr_Name).Select
-        Range(Selection, Selection.End(xlDown)).Select
-        Selection.TextToColumns Destination:=Cells(2, col_a125_gr_Name), DataType:=xlDelimited, _
-            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
-            Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
-            :=Array(1, 1), TrailingMinusNumbers:=True
-
-'最大列及最大+1列列名
-    colmax = ActiveSheet.UsedRange.Columns.Count
-    colmaxN = col_array(colmax - 1)
-    colmaxN1 = col_array(colmax + 1 - 1)
-
+    '按班升序再按总分降序排列
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("C2:C499") _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("E2:E499") _
+        , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("成绩排名").Sort
+        .SetRange Range("A1:AA499")
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
 '成绩排名工作表添加班级辅助列并去重
     Range(colmaxN1 & "2:" & colmaxN1 & rowmax).Value = Range("C2:C" & rowmax).Value
     Range(colmaxN1 & "2:" & colmaxN1 & rowmax).RemoveDuplicates 1
-    cn = Application.CountA(Range(colmaxN1 & ":" & colmaxN1))
+    cn = Application.CountA(Range(colmaxN1 & ":" & colmaxN1)) '去重后的班级数量
+    
+'统计班级人数、计算起始截止行数
+    x = 2
+    For i = 2 To cn + 1
+        Range(colmaxN2 & i) = Application.CountIf(Range("C1:C" & rowmax), Range(colmaxN1 & i))
+        Range(colmaxN3 & i) = x
+        Range(colmaxN4 & i) = x + Range(colmaxN2 & i) - 1
+        x = Range(colmaxN4 & i).Value + 1
+    Next
+    
+'计算总分加权班级排名
+    For j = 2 To cn + 1
+        For i = Range(colmaxN3 & j).Value To Range(colmaxN4 & j).Value
+            Cells(i, 7) = Application.Rank(Cells(i, 5), Range("E" & Range(colmaxN3 & j).Value & ":E" & Range(colmaxN4 & j).Value)) '按班级排名
+        Next
+    Next
 
 '逐个取辅助列的值，命名新建sheet，复制内容
-    For k = 2 To cn
+    For k = 2 To cn + 1
         clName = Sheets("成绩排名").Range(colmaxN1 & k).Value
         sheetNum = Sheets.Count
         Sheets.Add after:=Sheets(sheetNum)
         Sheets(sheetNum + 1).Name = clName
-        Sheets(sheetNum + 1).Range("A1:" & colmaxN & rowmax).Value = Sheets("成绩排名").Range("A1:" & colmaxN & rowmax).Value
+    Next
+    
+'逐个填充内容
+    For t = 2 To cn + 1
+        arr = Sheets("成绩排名").Range("A1:AA1").Value
+        MsgBox Cells(t, colmax + 1).Value
+        Sheets(Cells(t, colmax + 1).Value).Range("A1:AA1").Value = arr
+        'Sheets("成绩排名").Range("A" & Range(colmaxN3 & l).Value & ":" & colmaxN & Range(colmaxN4 & l).Value).Value
     Next
  
 '删除辅助列
     Sheets("成绩排名").Select
-    Columns(colmaxN1 & ":" & colmaxN1).Select
+    Columns(colmaxN1 & ":" & colmaxN4).Select
     Selection.Delete Shift:=xlToLeft
     
 '逐个调整行高列宽，设置标题字体样式
@@ -205,13 +277,6 @@ Sub 河南加权分()
             .PatternTintAndShade = 0
         End With
         Selection.Font.Bold = True
-        '删除非本班学生成绩（这有问题）
-            For y = 2 To rowmax
-                If Cells(y, 3).Value <> ActiveSheet.Name Then
-                    Rows(y & ":" & y).Select
-                    Selection.Delete Shift:=xlUp
-                End If
-            Next
     Next
 
 '完成时间
@@ -223,4 +288,3 @@ ActiveWorkbook.Save
 MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
 
 End Sub
-
