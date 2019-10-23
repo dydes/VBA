@@ -63,6 +63,12 @@ Sub 河南加权分()
 
 '文本转数值格式
     colmax = ActiveSheet.UsedRange.Columns.Count
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Replace What:="--", Replacement:="0", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
     For i = 1 To colmax
     Cells(2, i).Select
     Range(Selection, Selection.End(xlDown)).Select
@@ -181,6 +187,7 @@ Sub 河南加权分()
             a = a + Cells(h, i).Value
         Next
         Cells(h, col_a125).Value = a
+        Cells(h, col_a125).NumberFormatLocal = "0.0"
     Next
 
 '计算加权总分及排名
@@ -252,10 +259,21 @@ Sub 河南加权分()
     
 '逐个填充内容
     For t = 2 To cn + 1
-        arr = Sheets("成绩排名").Range("A1:AA1").Value
-        MsgBox Cells(t, colmax + 1).Value
-        Sheets(Cells(t, colmax + 1).Value).Range("A1:AA1").Value = arr
-        'Sheets("成绩排名").Range("A" & Range(colmaxN3 & l).Value & ":" & colmaxN & Range(colmaxN4 & l).Value).Value
+        Sheets("成绩排名").Select
+        Range("A" & Range(colmaxN3 & t).Value & ":" & colmaxN & Range(colmaxN4 & t).Value).Select
+        Selection.Copy
+        Sheets(Range(colmaxN1 & t).Value).Select
+        Range("A2:" & colmaxN & Range(colmaxN2 & t).Value + 1).Select
+        ActiveSheet.Paste
+        Rows("1:1").Select
+        Application.CutCopyMode = False
+        Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+        Sheets("成绩排名").Select
+        Range("A1:" & colmaxN & 1).Select
+        Selection.Copy
+        Sheets(Range(colmaxN1 & t).Value).Select
+        Range("A1:" & colmaxN & 1).Select
+        ActiveSheet.Paste
     Next
  
 '删除辅助列
@@ -263,10 +281,24 @@ Sub 河南加权分()
     Columns(colmaxN1 & ":" & colmaxN4).Select
     Selection.Delete Shift:=xlToLeft
     
+'按总分加权降序排列
+    Columns("A:" & colmaxN).Select
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("E2:E" & rowmax) _
+        , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("成绩排名").Sort
+        .SetRange Range("A1:" & colmaxN & rowmax)
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
 '逐个调整行高列宽，设置标题字体样式
     For s = 1 To sheetNum
         Sheets(s).Select
-        Columns(col_c_Name & ":" & col_c_Name).ColumnWidth = 14
+        Columns("A:" & col_c_Name).ColumnWidth = 13
         Rows("1:" & rowmax).EntireRow.AutoFit
         Range("A1:" & col_array(colmax - 1) & "1").Select
         With Selection.Interior
@@ -288,3 +320,4 @@ ActiveWorkbook.Save
 MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
 
 End Sub
+
