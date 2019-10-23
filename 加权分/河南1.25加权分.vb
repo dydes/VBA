@@ -50,19 +50,33 @@ Sub 河南加权分()
         xlOpenXMLWorkbook, CreateBackup:=False
     Windows(fName).Activate
         ActiveWorkbook.Close savechanges:=False
-
+        
 '删除顶部1或2行
     Sheets("成绩排名").Select
     If Range("A3").Value = "学生学号" Then
-        Rows("2:2").Select
+        Rows("1:2").Select
         Selection.Delete Shift:=xlUp
     Else
         Rows("1:1").Select
         Selection.Delete Shift:=xlUp
     End If
+    
+'判断是否有英语
+    ss = 0
+    For tt = 6 To 16
+        If Cells(1, tt).Value = "英语" Then
+            ss = ss + 1
+        End If
+    Next
+    If ss > 0 Then
+        GoTo 1
+    Else
+        MsgBox "未找到英语学科"
+        Exit Sub
+    End If
 
 '文本转数值格式
-    colmax = ActiveSheet.UsedRange.Columns.Count
+1:  colmax = ActiveSheet.UsedRange.Columns.Count
     Range("A1").Select
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlDown)).Select
