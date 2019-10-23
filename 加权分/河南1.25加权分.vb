@@ -215,12 +215,12 @@ Sub 河南加权分()
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlDown)).Select
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("C2:C499") _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("C2:C" & rowmax) _
         , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("E2:E499") _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("E2:E" & rowmax) _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("成绩排名").Sort
-        .SetRange Range("A1:AA499")
+        .SetRange Range("A1:AA" & rowmax)
         .Header = xlYes
         .MatchCase = False
         .Orientation = xlTopToBottom
