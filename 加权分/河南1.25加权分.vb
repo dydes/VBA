@@ -8,6 +8,9 @@ Sub 河南加权分()
     Dim rowmax As Integer, colmax As Integer
 '定义新增列相关变量
     Dim col_a As Integer, col_e As Integer
+    
+    Application.ScreenUpdating = False '暂停刷新
+    Application.DisplayAlerts = False '暂停通知
 
 '先选择文件，获取路径，若未选择任何文件，终止程序
     With Application.FileDialog(msoFileDialogFilePicker)
@@ -95,12 +98,14 @@ Sub 河南加权分()
 '加列
     '查找并增加总分、总分班次、总分级次3列
     col_a = Rows("1:1").Find(What:="总分").Column
+    col_a_Name = Split(Cells(1, col_a).Address, "$")(1) 'col_array(col_a - 1) '总分列名
     For i = 1 To 5 Step 2
         Columns(col_a + i).Select
         Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
     Next
     '查找并增加英语加权、英语加权年级排名2列
     col_e = Rows("1:1").Find(What:="英语").Column
+    col_e_Name = Split(Cells(1, col_e).Address, "$")(1) 'col_array(col_e - 1) '英语列号
     For i = 1 To 3 Step 2
         Columns(col_e + i).Select
         Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
@@ -110,37 +115,47 @@ Sub 河南加权分()
     '最大行列
     colmax = ActiveSheet.UsedRange.Columns.Count
     rowmax = ActiveSheet.UsedRange.Rows.Count
-    '列名转换数组
-    col_array = Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ")
     '列号及列名
     col_a125 = col_a + 1 '总分加权列号
-    col_a125_Name = col_array(col_a + 1 - 1) '总分加权列名
+    col_a125_Name = Split(Cells(1, col_a125).Address, "$")(1)
 
     col_a125_cr = col_a + 3 '总分加权班级排名列号
-    col_a125_cr_Name = col_array(col_a + 3 - 1) '总分加权班级排名列名
+    col_a125_cr_Name = Split(Cells(1, col_a125_cr).Address, "$")(1)
 
     col_a125_gr = col_a + 5 '总分加权年级排名列号
-    col_a125_gr_Name = col_array(col_a + 5 - 1) '总分加权年级排名列名
+    col_a125_gr_Name = Split(Cells(1, col_a125_gr).Address, "$")(1)
 
-    col_c_Name = col_array(col_a - 1 - 1) '总分班级名称列名
-    col_a_Name = col_array(col_a - 1) '总分列名
-    col_a_cr_Name = col_array(col_a + 2 - 1) '总分班级排名列名
-    col_a_gr_Name = col_array(col_a + 4 - 1) '总分年级排名列名
+    col_c = col_a - 1 '班级名称列号
+    col_c_Name = Split(Cells(1, col_c).Address, "$")(1)
+    
+    col_a_cr = col_a + 2 '总分班级排名列号
+    col_a_cr_Name = Split(Cells(1, col_a_cr).Address, "$")(1)
+    
+    col_a_gr = col_a + 4 '总分年级排名列号
+    col_a_gr_Name = Split(Cells(1, col_a_gr).Address, "$")(1)
 
     col_e125 = col_e + 1 '英语加权列号
-    col_e125_Name = col_array(col_e + 1 - 1) '英语加权列名
+    col_e125_Name = Split(Cells(1, col_e125).Address, "$")(1)
 
     col_e125_gr = col_e + 3 '英语加权年级排名列号
-    col_e125_gr_Name = col_array(col_e + 3 - 1) '英语加权年级排名列名
+    col_e125_gr_Name = Split(Cells(1, col_e125_gr).Address, "$")(1)
 
-    col_e_Name = col_array(col_e - 1) '英语列号
-    col_e_gr_Name = col_array(col_e + 2 - 1) '英语列名
+    col_e_gr = col_e + 2 '英语年级排名列号
+    col_e_gr_Name = Split(Cells(1, col_e_gr).Address, "$")(1)
 
-    colmaxN = col_array(colmax - 1) '最大列名
-    colmaxN1 = col_array(colmax + 1 - 1) '最大+1列名
-    colmaxN2 = col_array(colmax + 2 - 1) '最大+2列名
-    colmaxN3 = col_array(colmax + 3 - 1) '最大+3列名
-    colmaxN4 = col_array(colmax + 4 - 1) '最大+4列名
+    colmaxN = Split(Cells(1, colmax).Address, "$")(1) '最大列名
+    
+    colmax1 = colmax + 1
+    colmaxN1 = Split(Cells(1, colmax1).Address, "$")(1)  '最大+1列名
+    
+    colmax2 = colmax + 2
+    colmaxN2 = Split(Cells(1, colmax2).Address, "$")(1) '最大+2列名
+    
+    colmax3 = colmax + 3
+    colmaxN3 = Split(Cells(1, colmax3).Address, "$")(1)  '最大+3列名
+    
+    colmax4 = colmax + 4
+    colmaxN4 = Split(Cells(1, colmax4).Address, "$")(1)  '最大+4列名
 
 '命名表头
     Cells(1, col_a125_Name) = "总分加权"
@@ -314,7 +329,7 @@ Sub 河南加权分()
         Sheets(s).Select
         Columns("A:" & col_c_Name).ColumnWidth = 13
         Rows("1:" & rowmax).EntireRow.AutoFit
-        Range("A1:" & col_array(colmax - 1) & "1").Select
+        Range("A1:" & colmaxN & "1").Select
         With Selection.Interior
             .Pattern = xlSolid
             .PatternColorIndex = xlAutomatic
@@ -331,6 +346,8 @@ Sub 河南加权分()
     
 ActiveWindow.WindowState = xlMaximized
 ActiveWorkbook.Save
+
+Application.ScreenUpdating = True '重启刷新
 MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
 
 End Sub
