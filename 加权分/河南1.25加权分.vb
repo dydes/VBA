@@ -244,7 +244,7 @@ Sub 河南加权分()
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlDown)).Select
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("C2:C" & rowmax) _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("B2:B" & rowmax) _
         , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("E2:E" & rowmax) _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
@@ -258,14 +258,14 @@ Sub 河南加权分()
     End With
     
 '成绩排名工作表添加班级辅助列并去重
-    Range(colmaxN1 & "2:" & colmaxN1 & rowmax).Value = Range("C2:C" & rowmax).Value
+    Range(colmaxN1 & "2:" & colmaxN1 & rowmax).Value = Range("B2:B" & rowmax).Value
     Range(colmaxN1 & "2:" & colmaxN1 & rowmax).RemoveDuplicates 1
     cn = Application.CountA(Range(colmaxN1 & ":" & colmaxN1)) '去重后的班级数量
     
 '统计班级人数、计算起始截止行数
     x = 2
     For i = 2 To cn + 1
-        Range(colmaxN2 & i) = Application.CountIf(Range("C1:C" & rowmax), Range(colmaxN1 & i))
+        Range(colmaxN2 & i) = Application.CountIf(Range("B1:B" & rowmax), Range(colmaxN1 & i))
         Range(colmaxN3 & i) = x
         Range(colmaxN4 & i) = x + Range(colmaxN2 & i) - 1
         x = Range(colmaxN4 & i).Value + 1
@@ -351,4 +351,3 @@ Application.ScreenUpdating = True '重启刷新
 MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
 
 End Sub
-
