@@ -249,7 +249,7 @@ Sub 河南加权分()
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("E2:E" & rowmax) _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("成绩排名").Sort
-        .SetRange Range("A1:AA" & rowmax)
+        .SetRange Range("A1:"& colmaxN & rowmax)
         .Header = xlYes
         .MatchCase = False
         .Orientation = xlTopToBottom
