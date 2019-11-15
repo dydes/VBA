@@ -1,4 +1,4 @@
-Sub 等级赋分2.0()
+Sub 等级赋分()
 
 '定义文件处理相关变量
     Dim splfile As Variant, fName As String, fPath As String, file As String
@@ -82,18 +82,93 @@ Sub 等级赋分2.0()
         :=Array(1, 1), TrailingMinusNumbers:=True
     Next
 
-'加列？？？？
-    '查找并增加总分、总分班次、总分级次3列
-    col_a = Rows("1:1").Find(What:="总分").Column
-    col_a_Name = Split(Cells(1, col_a).Address, "$")(1) 'col_array(col_a - 1) '总分列名
+'确定总分位置并插列
+    '确定查找范围
+    Set title_range = Rows("1:1")
+    subject_arr = Array("总分", "物理", "化学", "生物", "历史", "地理", "政治", "通用技术", "信息技术")
+    
+    '确定总分位置
+    Rows("1:1").Select
+    Selection.Find(What:="总分", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, MatchByte:=False, SearchFormat:=False).Activate
+    col_sa = ActiveCell.Column
+    
+    '插入总分相关列
     For i = 1 To 5 Step 2
-        Columns(col_a + i).Select
-        Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+        Columns(col_sa + i).Select
+        Selection.Insert Shift:=xlToRight
     Next
-    '查找并增加英语加权、英语加权年级排名2列
-    col_e = Rows("1:1").Find(What:="英语").Column
-    col_e_Name = Split(Cells(1, col_e).Address, "$")(1) 'col_array(col_e - 1) '英语列号
-    For i = 1 To 3 Step 2
-        Columns(col_e + i).Select
-        Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    
+    '重命名总分相关列
+    Cells(1, col_sa) = "原始总分"
+    Cells(1, col_sa + 1) = "赋分总分"
+    Cells(1, col_sa + 2) = "原始班次"
+    Cells(1, col_sa + 3) = "赋分班次"
+    Cells(1, col_sa + 4) = "原始级次"
+    Cells(1, col_sa + 5) = "赋分级次"
+    
+'确定各科位置并插列
+    '逐个确定小学科位置
+    Set title_range = Rows("1:1")
+    For i = 1 To 8
+        subject_is_exist = Application.WorksheetFunction.CountIf(title_range, subject_arr(i))
+        If subject_is_exist > 0 Then
+            Rows("1:1").Select
+            Selection.Find(What:=subject_arr(i), After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+                :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+                False, MatchByte:=False, SearchFormat:=False).Activate
+            col_sn = ActiveCell.Column
+            name_sn = ActiveCell.Value
+            '插入小学科相关列
+            For h = 1 To 3 Step 2
+                Columns(col_sn + h).Select
+                Selection.Insert Shift:=xlToRight
+            Next
+            Columns(col_sn + 1).Select
+            Selection.Insert Shift:=xlToRight
+            '重命名总分相关列
+            Cells(1, col_sn) = "原始" & name_sn
+            Cells(1, col_sn + 1) = name_sn & "等级"
+            Cells(1, col_sn + 2) = "赋分" & name_sn
+            Cells(1, col_sn + 3) = "原始级次"
+            Cells(1, col_sn + 4) = "赋分级次"
+        End If
     Next
+
+
+
+
+'备份，这个需要等列都加完了之后，确定相关科目位置，用来计算总分
+    Set title_range = Rows("3:3")
+    subject_arr = Array("总分", "物理", "化学", "生物", "历史", "地理", "政治", "通用技术", "信息技术")
+    subject_score_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    For i = 0 To 8
+        subject_score_arr(i) = Application.WorksheetFunction.CountIf(title_range, subject_arr(i))
+    Next
+    '确定已存在科目列数、列标及标题内容
+    subject_score_col_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    subject_score_cname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    subject_score_tname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    For i = 0 To 8
+        If subject_score_arr(i) <> 0 Then
+            Rows("3:3").Select
+            Selection.Find(What:=subject_arr(i), After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+                :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+                False, MatchByte:=False, SearchFormat:=False).Activate
+                subject_score_col_arr(i) = ActiveCell.Column
+                subject_score_cname_arr(i) = Split(ActiveCell.Address, "$")(1)
+                subject_score_tname_arr(i) = ActiveCell.Value
+        End If
+    Next
+    '清洗科目数组，得到不含0的列数、列标及标题数组
+    subject_score_col_isNotNull = Join(subject_score_col_arr, ",")
+    subject_score_cname_isNotNull = Join(subject_score_cname_arr, ",")
+    subject_score_tname_isNotNull = Join(subject_score_tname_arr, ",")
+    subject_score_col_isNotNull = Replace(subject_score_col_isNotNull, ",0", "")
+    subject_score_cname_isNotNull = Replace(subject_score_cname_isNotNull, ",0", "")
+    subject_score_tname_isNotNull = Replace(subject_score_tname_isNotNull, ",0", "")
+    subject_col_arr = Split(subject_score_col_isNotNull, ",")
+    subject_colname_arr = Split(subject_score_cname_isNotNull, ",")
+    subject_til_arr = Split(subject_score_tname_isNotNull, ",")
+    MsgBox Join(subject_col_arr, ",") & Chr(13) & Join(subject_colname_arr, ",") & Chr(13) & Join(subject_til_arr, ",")
