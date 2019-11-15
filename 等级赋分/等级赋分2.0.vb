@@ -103,10 +103,10 @@ Sub 等级赋分()
     '重命名总分相关列
     Cells(1, col_sa) = "原始总分"
     Cells(1, col_sa + 1) = "赋分总分"
-    Cells(1, col_sa + 2) = "原始班次"
-    Cells(1, col_sa + 3) = "赋分班次"
-    Cells(1, col_sa + 4) = "原始级次"
-    Cells(1, col_sa + 5) = "赋分级次"
+    Cells(1, col_sa + 2) = "总分原始班次"
+    Cells(1, col_sa + 3) = "总分赋分班次"
+    Cells(1, col_sa + 4) = "总分原始级次"
+    Cells(1, col_sa + 5) = "总分赋分级次"
     
 '确定各科位置并插列
     '逐个确定小学科位置
@@ -131,28 +131,24 @@ Sub 等级赋分()
             Cells(1, col_sn) = "原始" & name_sn
             Cells(1, col_sn + 1) = name_sn & "等级"
             Cells(1, col_sn + 2) = "赋分" & name_sn
-            Cells(1, col_sn + 3) = "原始级次"
-            Cells(1, col_sn + 4) = "赋分级次"
+            Cells(1, col_sn + 3) = name_sn & "原始级次"
+            Cells(1, col_sn + 4) = name_sn & "赋分级次"
         End If
     Next
 
-
-
-
-'备份，这个需要等列都加完了之后，确定相关科目位置，用来计算总分
-    Set title_range = Rows("3:3")
-    subject_arr = Array("总分", "物理", "化学", "生物", "历史", "地理", "政治", "通用技术", "信息技术")
-    subject_score_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
-    For i = 0 To 8
+'定位总分及各科目位置
+    subject_arr = Array("赋分总分", "总分赋分班次", "总分赋分级次", "语文", "数学", "英语", "物理等级", "赋分物理", "物理赋分级次", "化学等级", "赋分化学", "化学赋分级次", "生物等级", "赋分生物", "生物赋分级次", "历史等级", "赋分历史", "历史赋分级次", "地理等级", "赋分地理", "地理赋分级次", "政治等级", "赋分政治", "政治赋分级次", "通用技术等级", "赋分通用技术", "通用技术赋分级次", "信息技术等级", "赋分信息技术", "信息技术赋分级次")
+    subject_score_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    For i = 0 To 11
         subject_score_arr(i) = Application.WorksheetFunction.CountIf(title_range, subject_arr(i))
     Next
     '确定已存在科目列数、列标及标题内容
-    subject_score_col_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
-    subject_score_cname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
-    subject_score_tname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
-    For i = 0 To 8
+    subject_score_col_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    subject_score_cname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    subject_score_tname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    For i = 0 To 11
         If subject_score_arr(i) <> 0 Then
-            Rows("3:3").Select
+            Rows("1:1").Select
             Selection.Find(What:=subject_arr(i), After:=ActiveCell, LookIn:=xlFormulas, LookAt _
                 :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
                 False, MatchByte:=False, SearchFormat:=False).Activate
@@ -172,3 +168,5 @@ Sub 等级赋分()
     subject_colname_arr = Split(subject_score_cname_isNotNull, ",")
     subject_til_arr = Split(subject_score_tname_isNotNull, ",")
     MsgBox Join(subject_col_arr, ",") & Chr(13) & Join(subject_colname_arr, ",") & Chr(13) & Join(subject_til_arr, ",")
+    
+End Sub
