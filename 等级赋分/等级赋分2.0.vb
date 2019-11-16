@@ -66,10 +66,9 @@ Sub 等级赋分()
 
 '格式清洗
 '替换--
-    Range("A1").Select
-    Range(Selection, Selection.End(xlToRight)).Select
+    Rows("2:" & rowmax).Select
     Range(Selection, Selection.End(xlDown)).Select
-    Selection.Replace What:="--", Replacement:="0", LookAt:=xlPart, _
+    Selection.Replace What:="--", Replacement:="", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
 '逐列文本转数值
@@ -136,17 +135,20 @@ Sub 等级赋分()
         End If
     Next
 
-'定位总分及各科目位置
-    subject_arr = Array("赋分总分", "总分赋分班次", "总分赋分级次", "语文", "数学", "英语", "物理等级", "赋分物理", "物理赋分级次", "化学等级", "赋分化学", "化学赋分级次", "生物等级", "赋分生物", "生物赋分级次", "历史等级", "赋分历史", "历史赋分级次", "地理等级", "赋分地理", "地理赋分级次", "政治等级", "赋分政治", "政治赋分级次", "通用技术等级", "赋分通用技术", "通用技术赋分级次", "信息技术等级", "赋分信息技术", "信息技术赋分级次")
-    subject_score_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    For i = 0 To 11
+'确定各科位置并插列
+    '逐个确定小学科位置
+    Set title_range = Rows("1:1")
+
+'定位小科赋分等级列位置（加总分是为了清洗方便）
+    subject_arr = Array("赋分总分", "物理等级", "化学等级", "生物等级", "历史等级", "地理等级", "政治等级", "通用技术等级", "信息技术等级")
+    subject_score_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    For i = 0 To 8
         subject_score_arr(i) = Application.WorksheetFunction.CountIf(title_range, subject_arr(i))
     Next
-    '确定已存在科目列数、列标及标题内容
-    subject_score_col_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    subject_score_cname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    subject_score_tname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    For i = 0 To 11
+    '确定已存在科目列数、列标内容
+    subject_score_col_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    subject_score_cname_arr = Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    For i = 0 To 8
         If subject_score_arr(i) <> 0 Then
             Rows("1:1").Select
             Selection.Find(What:=subject_arr(i), After:=ActiveCell, LookIn:=xlFormulas, LookAt _
@@ -154,19 +156,112 @@ Sub 等级赋分()
                 False, MatchByte:=False, SearchFormat:=False).Activate
                 subject_score_col_arr(i) = ActiveCell.Column
                 subject_score_cname_arr(i) = Split(ActiveCell.Address, "$")(1)
-                subject_score_tname_arr(i) = ActiveCell.Value
         End If
     Next
-    '清洗科目数组，得到不含0的列数、列标及标题数组
+    '清洗科目数组，得到不含0的列数、列标数组
     subject_score_col_isNotNull = Join(subject_score_col_arr, ",")
     subject_score_cname_isNotNull = Join(subject_score_cname_arr, ",")
-    subject_score_tname_isNotNull = Join(subject_score_tname_arr, ",")
     subject_score_col_isNotNull = Replace(subject_score_col_isNotNull, ",0", "")
     subject_score_cname_isNotNull = Replace(subject_score_cname_isNotNull, ",0", "")
-    subject_score_tname_isNotNull = Replace(subject_score_tname_isNotNull, ",0", "")
     subject_col_arr = Split(subject_score_col_isNotNull, ",")
     subject_colname_arr = Split(subject_score_cname_isNotNull, ",")
-    subject_til_arr = Split(subject_score_tname_isNotNull, ",")
-    MsgBox Join(subject_col_arr, ",") & Chr(13) & Join(subject_colname_arr, ",") & Chr(13) & Join(subject_til_arr, ",")
-    
+
+'清洗原始分列
+    '替换--
+    For i = 1 To UBound(subject_col_arr)
+        coln = Split(Cells(1, subject_col_arr(i) - 1).Address, "$")(1)
+        Columns(coln).Select
+        Selection.Replace What:="--", Replacement:="0", LookAt:=xlPart, _
+            SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+            ReplaceFormat:=False
+    Next
+
+'逐列计算等级
+    '计算相对排名
+    For h = 1 To UBound(subject_col_arr)
+        For i = 2 To rowmax
+            num = Cells(i, subject_col_arr(h) - 1).Value
+            Set rnk_rng = Range(Cells(i, subject_col_arr(h) - 1), Cells(rowmax, subject_col_arr(h) - 1))
+            rnk = Application.Rank(num, rnk_rng, 0)
+            If num = 0 Then
+                rnk_rate = 0
+            Else
+                rnk_rate = rnk / (rowmax - 1)
+            End If
+            If num > 0 Then
+                '计算赋分等级与赋分
+                If rnk_rate > 0 And rnk_rate <= 0.01 Then
+                    Range(subject_colname_arr(h) & i) = "A1"
+                    Cells(i, subject_col_arr(h) + 1) = 100
+                ElseIf rnk_rate > 0.01 And rnk_rate <= 0.03 Then
+                    Range(subject_colname_arr(h) & i) = "A2"
+                    Cells(i, subject_col_arr(h) + 1) = 97
+                ElseIf rnk_rate > 0.03 And rnk_rate <= 0.06 Then
+                    Range(subject_colname_arr(h) & i) = "A3"
+                    Cells(i, subject_col_arr(h) + 1) = 94
+                ElseIf rnk_rate > 0.06 And rnk_rate <= 0.1 Then
+                    Range(subject_colname_arr(h) & i) = "A4"
+                    Cells(i, subject_col_arr(h) + 1) = 91
+                ElseIf rnk_rate > 0.1 And rnk_rate <= 0.15 Then
+                    Range(subject_colname_arr(h) & i) = "A5"
+                    Cells(i, subject_col_arr(h) + 1) = 88
+                ElseIf rnk_rate > 0.15 And rnk_rate <= 0.21 Then
+                    Range(subject_colname_arr(h) & i) = "B1"
+                    Cells(i, subject_col_arr(h) + 1) = 85
+                ElseIf rnk_rate > 0.21 And rnk_rate <= 0.28 Then
+                    Range(subject_colname_arr(h) & i) = "B2"
+                    Cells(i, subject_col_arr(h) + 1) = 82
+                ElseIf rnk_rate > 0.28 And rnk_rate <= 0.36 Then
+                    Range(subject_colname_arr(h) & i) = "B3"
+                    Cells(i, subject_col_arr(h) + 1) = 79
+                ElseIf rnk_rate > 0.36 And rnk_rate <= 0.43 Then
+                    Range(subject_colname_arr(h) & i) = "B4"
+                    Cells(i, subject_col_arr(h) + 1) = 76
+                ElseIf rnk_rate > 0.43 And rnk_rate <= 0.5 Then
+                    Range(subject_colname_arr(h) & i) = "B5"
+                    Cells(i, subject_col_arr(h) + 1) = 73
+                ElseIf rnk_rate > 0.5 And rnk_rate <= 0.57 Then
+                    Range(subject_colname_arr(h) & i) = "C1"
+                    Cells(i, subject_col_arr(h) + 1) = 70
+                ElseIf rnk_rate > 0.57 And rnk_rate <= 0.64 Then
+                    Range(subject_colname_arr(h) & i) = "C2"
+                    Cells(i, subject_col_arr(h) + 1) = 67
+                ElseIf rnk_rate > 0.64 And rnk_rate <= 0.71 Then
+                    Range(subject_colname_arr(h) & i) = "C3"
+                    Cells(i, subject_col_arr(h) + 1) = 64
+                ElseIf rnk_rate > 0.71 And rnk_rate <= 0.78 Then
+                    Range(subject_colname_arr(h) & i) = "C4"
+                    Cells(i, subject_col_arr(h) + 1) = 61
+                ElseIf rnk_rate > 0.78 And rnk_rate <= 0.84 Then
+                    Range(subject_colname_arr(h) & i) = "C5"
+                    Cells(i, subject_col_arr(h) + 1) = 58
+                ElseIf rnk_rate > 0.84 And rnk_rate <= 0.89 Then
+                    Range(subject_colname_arr(h) & i) = "D1"
+                    Cells(i, subject_col_arr(h) + 1) = 55
+                ElseIf rnk_rate > 0.89 And rnk_rate <= 0.93 Then
+                    Range(subject_colname_arr(h) & i) = "D2"
+                    Cells(i, subject_col_arr(h) + 1) = 52
+                ElseIf rnk_rate > 0.93 And rnk_rate <= 0.96 Then
+                    Range(subject_colname_arr(h) & i) = "D3"
+                    Cells(i, subject_col_arr(h) + 1) = 49
+                ElseIf rnk_rate > 0.96 And rnk_rate <= 0.98 Then
+                    Range(subject_colname_arr(h) & i) = "D4"
+                    Cells(i, subject_col_arr(h) + 1) = 46
+                ElseIf rnk_rate > 0.98 And rnk_rate <= 0.99 Then
+                    Range(subject_colname_arr(h) & i) = "D5"
+                    Cells(i, subject_col_arr(h) + 1) = 43
+                ElseIf rnk_rate > 0.99 And rnk_rate <= 1 Then
+                    Range(subject_colname_arr(h) & i) = "E"
+                    Cells(i, subject_col_arr(h) + 1) = 40
+                Else
+                    Cells(i, subject_col_arr(h)) = ""
+                End If
+                '计算赋分级次
+                num1 = Cells(i, subject_col_arr(h) + 2).Value
+                Set rnk_rng1 = Range(Cells(i, subject_col_arr(h) + 2), Cells(rowmax, subject_col_arr(h) + 2))
+                Cells(i, subject_col_arr(h) + 3) = Application.Rank(num1, rnk_rng1, 0)
+            Else
+            End If
+        Next
+    Next
 End Sub
