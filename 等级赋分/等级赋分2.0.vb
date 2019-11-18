@@ -264,4 +264,55 @@ Sub 等级赋分()
             End If
         Next
     Next
+
+'求当前最大列数
+    colmax1 = Sheets("成绩排名").UsedRange.Columns.Count
+
+'定位各科赋分列位置
+    subject_arr1 = Array("赋分总分", "语文", "数学", "英语", "赋分物理", "赋分化学", "赋分生物", "赋分历史", "赋分地理", "赋分政治", "赋分通用技术", "赋分信息技术")
+    subject_score_arr1 = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    For i = 0 To 11
+        subject_score_arr1(i) = Application.WorksheetFunction.CountIf(title_range, subject_arr1(i))
+    Next
+    '确定已存在科目列数、列标内容
+    subject_score_col_arr1 = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    subject_score_cname_arr1 = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    For i = 0 To 11
+        If subject_score_arr1(i) <> 0 Then
+            Rows("1:1").Select
+            Selection.Find(What:=subject_arr1(i), After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+                :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+                False, MatchByte:=False, SearchFormat:=False).Activate
+                subject_score_col_arr1(i) = ActiveCell.Column
+                subject_score_cname_arr1(i) = Split(ActiveCell.Address, "$")(1)
+        End If
+    Next
+    '清洗科目数组，得到不含0的列数、列标数组
+    subject_score_col_isNotNull1 = Join(subject_score_col_arr1, ",")
+    subject_score_cname_isNotNull1 = Join(subject_score_cname_arr1, ",")
+    subject_score_col_isNotNull1 = Replace(subject_score_col_isNotNull1, ",0", "")
+    subject_score_cname_isNotNull1 = Replace(subject_score_cname_isNotNull1, ",0", "")
+    subject_col_arr1 = Split(subject_score_col_isNotNull1, ",")
+    subject_colname_arr1 = Split(subject_score_cname_isNotNull1, ",")
+
+'计算赋分总分
+    For i = 2 To rowmax
+        aa = 0
+        For h = 1 To UBound(subject_colname_arr1)
+            aa = aa + Range(subject_colname_arr1(h) & i)
+        Next
+        Cells(i, 5) = aa
+    Next
+    
+'计算总分赋分级次
+    Set rnk_rng1 = Range(subject_colname_arr1(0) & 2 & ":" & subject_colname_arr1(0) & rowmax)
+    For i = 2 To rowmax
+        num1 = Range(subject_colname_arr1(0) & i).Value
+        If num1 = 0 Then
+            Cells(i, subject_col_arr1(0) + 4) = ""
+        Else
+            Cells(i, subject_col_arr1(0) + 4) = Application.Rank(num1, rnk_rng1, 0)
+        End If
+    Next
+
 End Sub
