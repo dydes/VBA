@@ -240,16 +240,16 @@ Sub 河南加权分()
         Cells(i, col_a125_gr) = Application.Rank(Cells(i, col_a125), Range(col_a125_Name & "2:" & col_a125_Name & rowmax))
     Next
     '按班升序再按总分降序排列
-    Range("A1").Select
-    Range(Selection, Selection.End(xlToRight)).Select
-    Range(Selection, Selection.End(xlDown)).Select
+    Range("A:" & colmaxN).Select
+    Set rng1 = Range("B2:B" & rowmax)
+    Set rng2 = Range("E2:E" & rowmax)
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("B2:B" & rowmax) _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=rng1 _
         , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("E2:E" & rowmax) _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=rng2 _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("成绩排名").Sort
-        .SetRange Range("A1:"& colmaxN & rowmax)
+        .SetRange Range("A1:" & colmaxN & rowmax)
         .Header = xlYes
         .MatchCase = False
         .Orientation = xlTopToBottom
@@ -313,7 +313,7 @@ Sub 河南加权分()
 '按总分加权降序排列
     Columns("A:" & colmaxN).Select
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range("E2:E" & rowmax) _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=rng2 _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("成绩排名").Sort
         .SetRange Range("A1:" & colmaxN & rowmax)
