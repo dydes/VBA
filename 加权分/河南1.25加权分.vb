@@ -175,7 +175,7 @@ Sub 河南加权分()
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlDown)).Select
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range(col_e125_Name & "2:" & col_e125_Name & rowmax) _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add Key:=Range(col_e125_Name & "2:" & col_e125_Name & rowmax) _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("成绩排名").Sort
         .SetRange Range("A1:" & colmaxN & rowmax)
@@ -225,7 +225,7 @@ Sub 河南加权分()
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlDown)).Select
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=Range(col_a125_Name & "2:" & col_a125_Name & rowmax) _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add Key:=Range(col_a125_Name & "2:" & col_a125_Name & rowmax) _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("成绩排名").Sort
         .SetRange Range("A1:" & colmaxN & rowmax)
@@ -244,9 +244,9 @@ Sub 河南加权分()
     Set rng1 = Range("B2:B" & rowmax)
     Set rng2 = Range("E2:E" & rowmax)
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=rng1 _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add Key:=rng1 _
         , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=rng2 _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add Key:=rng2 _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("成绩排名").Sort
         .SetRange Range("A1:" & colmaxN & rowmax)
@@ -313,7 +313,7 @@ Sub 河南加权分()
 '按总分加权降序排列
     Columns("A:" & colmaxN).Select
     ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add2 Key:=rng2 _
+    ActiveWorkbook.Worksheets("成绩排名").Sort.SortFields.Add Key:=rng2 _
         , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("成绩排名").Sort
         .SetRange Range("A1:" & colmaxN & rowmax)
