@@ -77,10 +77,13 @@ Sub 短信ETL()
 
     Selection.Replace What:="*财务拒绝", Replacement:="拒绝退款", LookAt:= _
         xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-        
+        ReplaceFormat:=False  
 
     Selection.Replace What:="*[退款审核]*", Replacement:="退款审核", LookAt:= _
+        xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+
+    Selection.Replace What:="*上留言了，请及时登录EMP*", Replacement:="订单留言", LookAt:= _
         xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
 
