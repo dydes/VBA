@@ -25,7 +25,42 @@ Sub 横竖版()
     Application.ScreenUpdating = False '暂停刷新
     Application.DisplayAlerts = False '暂停通知
 
+'选择要保存的文件路径，若未选择任何文件夹，终止程序
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "请选择要保存的文件夹"
+        .InitialFileName = "D:\会通\VBA\横竖版\"
+        If .Show = -1 Then
+            fPath = .SelectedItems(1)
+        Else: Exit Sub
+        End If
+    End With
+    fName = "横竖版成绩-" & dat & tim & ".xlsx" '新建工作簿的名称
+    gName = ActiveWorkbook.Name
+    
+'新建工作簿
+    Workbooks.Add
+    ChDir fPath
+        ActiveWorkbook.SaveAs Filename:=fPath & "\" & fName, FileFormat:= _
+        xlOpenXMLWorkbook, CreateBackup:=False
+        
+'工作表命名
+    Sheets("Sheet1").Name = "说明"
+    
+'将模板中说明和总表的内容转移到新建的文件中
+    Windows(gName).Activate
+    Sheets("说明").Range("A1:B3").Select
+    Selection.Copy
+    Windows(fName).Activate
+    Sheets("说明").Select
+    Range("A1").Select
+    ActiveSheet.Paste
+    
+    Windows(gName).Activate
+    Sheets("总表").Select
+    Sheets("总表").Copy After:=Workbooks(fName).Sheets(1)
+
 '获取总表最大行数
+    Windows(fName).Activate
     Sheets("总表").Select
     rowmax = ActiveSheet.UsedRange.Rows.Count
     
@@ -130,6 +165,7 @@ Sub 横竖版()
     Selection.ColumnWidth = 5
 
 '生成各班结束行数
+    Windows(fName).Activate
     Sheets("说明").Select
     rowmax2 = ActiveSheet.UsedRange.Rows.Count '班级矩阵的最大行数
     For i = 5 To rowmax2 - 1
@@ -185,6 +221,7 @@ Sub 横竖版()
     Next
 
 '删除总表GH列，调整列顺序
+    Windows(fName).Activate
     Sheets("总表").Select
     Range("G:H").Select
     Selection.Delete Shift:=xlToLeft
@@ -202,7 +239,7 @@ Sub 横竖版()
         '生成新sheet
         clName = Sheets("说明").Range("A" & i).Value & "班总"
         sheetNum = Sheets.Count
-        Sheets.Add after:=Sheets(sheetNum)
+        Sheets.Add After:=Sheets(sheetNum)
         Sheets(sheetNum + 1).Name = clName
         '复制表头
         Sheets("总表").Range("B1:F1").Copy
@@ -364,7 +401,7 @@ Sub 横竖版()
         '生成新sheet
         clName = Sheets("说明").Range("A" & i).Value & "班竖"
         sheetNum = Sheets.Count
-        Sheets.Add after:=Sheets(sheetNum)
+        Sheets.Add After:=Sheets(sheetNum)
         Sheets(sheetNum + 1).Name = clName
         '复制表头
         Sheets("总表").Range("B1:F1").Copy
@@ -536,11 +573,12 @@ Sub 横竖版()
     Next
 
 '逐个创建各班三栏sheet
+    Windows(fName).Activate
     For i = 5 To rowmax2
         '生成新sheet
         clName = Sheets("说明").Range("A" & i).Value & "班横"
         sheetNum = Sheets.Count
-        Sheets.Add after:=Sheets(sheetNum)
+        Sheets.Add After:=Sheets(sheetNum)
         Sheets(sheetNum + 1).Name = clName
         '复制表头
         Sheets("总表").Range("B1:F1").Copy
@@ -780,6 +818,7 @@ Sub 横竖版()
     Next
 
 '保存
+    Windows(fName).Activate
     ThisWorkbook.Save
 
 '完成时间
