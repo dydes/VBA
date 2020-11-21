@@ -25,7 +25,43 @@ Sub 横竖版()
     Application.ScreenUpdating = False '暂停刷新
     Application.DisplayAlerts = False '暂停通知
 
+'选择要保存的文件路径，若未选择任何文件夹，终止程序
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "请选择要保存的文件夹"
+        .InitialFileName = "D:\会通\VBA\横竖版\"
+        If .Show = -1 Then
+            fPath = .SelectedItems(1)
+        Else: Exit Sub
+        End If
+    End With
+    fName = "横竖版成绩-" & dat & tim & ".xlsx" '新建工作簿的名称
+    gName = ActiveWorkbook.Name
+    
+'新建工作簿
+    Workbooks.Add
+    ChDir fPath
+        ActiveWorkbook.SaveAs Filename:=fPath & "\" & fName, FileFormat:= _
+        xlOpenXMLWorkbook, CreateBackup:=False
+        
+'工作表命名
+    Sheets("Sheet1").Name = "说明"
+    
+'将模板中说明和总表的内容转移到新建的文件中
+    Windows(gName).Activate
+    Sheets("说明").Activate
+    Sheets("说明").Range("A1:B3").Select
+    Selection.Copy
+    Windows(fName).Activate
+    Sheets("说明").Select
+    Range("A1").Select
+    ActiveSheet.Paste
+    
+    Windows(gName).Activate
+    Sheets("总表").Select
+    Sheets("总表").Copy After:=Workbooks(fName).Sheets(1)
+
 '获取总表最大行数
+    Windows(fName).Activate
     Sheets("总表").Select
     rowmax = ActiveSheet.UsedRange.Rows.Count
     
@@ -113,23 +149,10 @@ Sub 横竖版()
     Sheets("说明").Range("N4") = "三右结束行号"
     
 '调整列宽
-    Range("B4:N4").Select
-    Range("N4").Activate
-    With Selection
-        .HorizontalAlignment = xlGeneral
-        .VerticalAlignment = xlCenter
-        .WrapText = True
-        .Orientation = 0
-        .AddIndent = False
-        .IndentLevel = 0
-        .ShrinkToFit = False
-        .ReadingOrder = xlContext
-        .MergeCells = False
-    End With
-    Columns("B:N").Select
-    Selection.ColumnWidth = 5
+    Call cwidth("B:N", 5)
 
 '生成各班结束行数
+    Windows(fName).Activate
     Sheets("说明").Select
     rowmax2 = ActiveSheet.UsedRange.Rows.Count '班级矩阵的最大行数
     For i = 5 To rowmax2 - 1
@@ -185,6 +208,7 @@ Sub 横竖版()
     Next
 
 '删除总表GH列，调整列顺序
+    Windows(fName).Activate
     Sheets("总表").Select
     Range("G:H").Select
     Selection.Delete Shift:=xlToLeft
@@ -202,7 +226,7 @@ Sub 横竖版()
         '生成新sheet
         clName = Sheets("说明").Range("A" & i).Value & "班总"
         sheetNum = Sheets.Count
-        Sheets.Add after:=Sheets(sheetNum)
+        Sheets.Add After:=Sheets(sheetNum)
         Sheets(sheetNum + 1).Name = clName
         '复制表头
         Sheets("总表").Range("B1:F1").Copy
@@ -224,139 +248,22 @@ Sub 横竖版()
         Subject = "考试科目：" & Sheets("说明").Range("B3")
         Group = "班级：" & Sheets("说明").Range("A" & i) & "班"
         Range("A2") = Subject & "   " & Group
-        '合并标题
-        Range("A1:E1").Select
-        With Selection
-            .HorizontalAlignment = xlCenter
-            .VerticalAlignment = xlCenter
-            .WrapText = False
-            .Orientation = 0
-            .AddIndent = False
-            .IndentLevel = 0
-            .ShrinkToFit = False
-            .ReadingOrder = xlContext
-            .MergeCells = False
-        End With
-        Selection.Merge
-        Range("A2:E2").Select
-        With Selection
-            .HorizontalAlignment = xlCenter
-            .VerticalAlignment = xlCenter
-            .WrapText = False
-            .Orientation = 0
-            .AddIndent = False
-            .IndentLevel = 0
-            .ShrinkToFit = False
-            .ReadingOrder = xlContext
-            .MergeCells = False
-        End With
-        Selection.Merge
-        '调整格式
-        Columns("A:E").Select
-        Columns("A:E").EntireColumn.AutoFit
-        rowmax3 = ActiveSheet.UsedRange.Rows.Count
-        Range("A1:E" & rowmax3).Select
-        Selection.Borders(xlDiagonalDown).LineStyle = xlNone
-        Selection.Borders(xlDiagonalUp).LineStyle = xlNone
-        With Selection.Borders(xlEdgeLeft)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeTop)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeBottom)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeRight)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlInsideVertical)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlInsideHorizontal)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        Range("A1:E3").Select
-        With Selection.Interior
-            .Pattern = xlSolid
-            .PatternColorIndex = xlAutomatic
-            .ThemeColor = xlThemeColorAccent5
-            .TintAndShade = 0.799981688894314
-            .PatternTintAndShade = 0
-        End With
-        '页面设置
-        Application.PrintCommunication = False
-        With ActiveSheet.PageSetup
-            .PrintTitleRows = ""
-            .PrintTitleColumns = ""
-        End With
-        Application.PrintCommunication = True
-        ActiveSheet.PageSetup.PrintArea = ""
-        Application.PrintCommunication = False
-        With ActiveSheet.PageSetup
-            .LeftHeader = ""
-            .CenterHeader = ""
-            .RightHeader = ""
-            .LeftFooter = ""
-            .CenterFooter = ""
-            .RightFooter = ""
-            .LeftMargin = Application.InchesToPoints(0.196850393700787)
-            .RightMargin = Application.InchesToPoints(0.196850393700787)
-            .TopMargin = Application.InchesToPoints(0.196850393700787)
-            .BottomMargin = Application.InchesToPoints(0.196850393700787)
-            .HeaderMargin = Application.InchesToPoints(0)
-            .FooterMargin = Application.InchesToPoints(0)
-            .PrintHeadings = False
-            .PrintGridlines = False
-            .PrintComments = xlPrintNoComments
-            .PrintQuality = 1200
-            .CenterHorizontally = False
-            .CenterVertically = False
-            .Orientation = xlPortrait
-            .Draft = False
-            .PaperSize = xlPaperA4
-            .FirstPageNumber = xlAutomatic
-            .Order = xlDownThenOver
-            .BlackAndWhite = False
-            .Zoom = 100
-            .PrintErrors = xlPrintErrorsDisplayed
-            .OddAndEvenPagesHeaderFooter = False
-            .DifferentFirstPageHeaderFooter = False
-            .ScaleWithDocHeaderFooter = True
-            .AlignMarginsHeaderFooter = True
-            .EvenPage.LeftHeader.Text = ""
-            .EvenPage.CenterHeader.Text = ""
-            .EvenPage.RightHeader.Text = ""
-            .EvenPage.LeftFooter.Text = ""
-            .EvenPage.CenterFooter.Text = ""
-            .EvenPage.RightFooter.Text = ""
-            .FirstPage.LeftHeader.Text = ""
-            .FirstPage.CenterHeader.Text = ""
-            .FirstPage.RightHeader.Text = ""
-            .FirstPage.LeftFooter.Text = ""
-            .FirstPage.CenterFooter.Text = ""
-            .FirstPage.RightFooter.Text = ""
-        End With
-        Application.PrintCommunication = True
-        ActiveWindow.View = xlNormalView
+        
+        '调用cmerge函数合并标题
+        cmerge ("A1:E1")
+        cmerge ("A2:E2")
+        
+        '调用列宽自适应函数
+        Call cfit("A:E")
+        
+        '调用表格画线函数
+        Call tline("A1", "E")
+
+        '调用标题上色函数
+        Call tcolor("A1:E3")
+
+        '调用显示打印边界函数
+        Call psetting
     Next
     
 '逐个创建各班双栏sheet
@@ -364,7 +271,7 @@ Sub 横竖版()
         '生成新sheet
         clName = Sheets("说明").Range("A" & i).Value & "班竖"
         sheetNum = Sheets.Count
-        Sheets.Add after:=Sheets(sheetNum)
+        Sheets.Add After:=Sheets(sheetNum)
         Sheets(sheetNum + 1).Name = clName
         '复制表头
         Sheets("总表").Range("B1:F1").Copy
@@ -395,152 +302,34 @@ Sub 横竖版()
         Subject = "考试科目：" & Sheets("说明").Range("B3")
         Group = "班级：" & Sheets("说明").Range("A" & i) & "班"
         Range("A2") = Subject & "        " & Group
-        '合并标题
-        Range("A1:K1").Select
-        With Selection
-            .HorizontalAlignment = xlCenter
-            .VerticalAlignment = xlCenter
-            .WrapText = False
-            .Orientation = 0
-            .AddIndent = False
-            .IndentLevel = 0
-            .ShrinkToFit = False
-            .ReadingOrder = xlContext
-            .MergeCells = False
-        End With
-        Selection.Merge
-        Range("A2:K2").Select
-        With Selection
-            .HorizontalAlignment = xlCenter
-            .VerticalAlignment = xlCenter
-            .WrapText = False
-            .Orientation = 0
-            .AddIndent = False
-            .IndentLevel = 0
-            .ShrinkToFit = False
-            .ReadingOrder = xlContext
-            .MergeCells = False
-        End With
-        Selection.Merge
-        '调整格式
-        Columns("A:K").Select
-        Columns("A:K").EntireColumn.AutoFit
-        rowmax4 = ActiveSheet.UsedRange.Rows.Count
-        Range("A1:K" & rowmax4).Select
-        Selection.Borders(xlDiagonalDown).LineStyle = xlNone
-        Selection.Borders(xlDiagonalUp).LineStyle = xlNone
-        With Selection.Borders(xlEdgeLeft)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeTop)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeBottom)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeRight)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlInsideVertical)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlInsideHorizontal)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        Range("A1:k3").Select
-        With Selection.Interior
-            .Pattern = xlSolid
-            .PatternColorIndex = xlAutomatic
-            .ThemeColor = xlThemeColorAccent5
-            .TintAndShade = 0.799981688894314
-            .PatternTintAndShade = 0
-        End With
-        Range("F3").Select
-        With Selection.Font
-            .ThemeColor = xlThemeColorAccent5
-            .TintAndShade = 0.799981688894314
-        End With
-        '页面设置
-        Application.PrintCommunication = False
-        With ActiveSheet.PageSetup
-            .PrintTitleRows = ""
-            .PrintTitleColumns = ""
-        End With
-        Application.PrintCommunication = True
-        ActiveSheet.PageSetup.PrintArea = ""
-        Application.PrintCommunication = False
-        With ActiveSheet.PageSetup
-            .LeftHeader = ""
-            .CenterHeader = ""
-            .RightHeader = ""
-            .LeftFooter = ""
-            .CenterFooter = ""
-            .RightFooter = ""
-            .LeftMargin = Application.InchesToPoints(0.196850393700787)
-            .RightMargin = Application.InchesToPoints(0.196850393700787)
-            .TopMargin = Application.InchesToPoints(0.196850393700787)
-            .BottomMargin = Application.InchesToPoints(0.196850393700787)
-            .HeaderMargin = Application.InchesToPoints(0)
-            .FooterMargin = Application.InchesToPoints(0)
-            .PrintHeadings = False
-            .PrintGridlines = False
-            .PrintComments = xlPrintNoComments
-            .PrintQuality = 1200
-            .CenterHorizontally = False
-            .CenterVertically = False
-            .Orientation = xlPortrait
-            .Draft = False
-            .PaperSize = xlPaperA4
-            .FirstPageNumber = xlAutomatic
-            .Order = xlDownThenOver
-            .BlackAndWhite = False
-            .Zoom = 100
-            .PrintErrors = xlPrintErrorsDisplayed
-            .OddAndEvenPagesHeaderFooter = False
-            .DifferentFirstPageHeaderFooter = False
-            .ScaleWithDocHeaderFooter = True
-            .AlignMarginsHeaderFooter = True
-            .EvenPage.LeftHeader.Text = ""
-            .EvenPage.CenterHeader.Text = ""
-            .EvenPage.RightHeader.Text = ""
-            .EvenPage.LeftFooter.Text = ""
-            .EvenPage.CenterFooter.Text = ""
-            .EvenPage.RightFooter.Text = ""
-            .FirstPage.LeftHeader.Text = ""
-            .FirstPage.CenterHeader.Text = ""
-            .FirstPage.RightHeader.Text = ""
-            .FirstPage.LeftFooter.Text = ""
-            .FirstPage.CenterFooter.Text = ""
-            .FirstPage.RightFooter.Text = ""
-        End With
-        Application.PrintCommunication = True
-        ActiveWindow.View = xlNormalView
+        
+        '调用cmerge函数合并标题
+        cmerge ("A1:K1")
+        cmerge ("A2:K2")
+        
+        '调用列宽自适应函数
+        Call cfit("A:K")
+        
+        '调用表格画线函数
+        Call tline("A1", "K")
+        
+        '调用标题上色函数
+        Call tcolor("A1:K3")
+        
+        '调用标题隐色函数
+        Call tlhide("F3")
+        
+        '调用显示打印边界函数
+        Call psetting
     Next
 
 '逐个创建各班三栏sheet
+    Windows(fName).Activate
     For i = 5 To rowmax2
         '生成新sheet
         clName = Sheets("说明").Range("A" & i).Value & "班横"
         sheetNum = Sheets.Count
-        Sheets.Add after:=Sheets(sheetNum)
+        Sheets.Add After:=Sheets(sheetNum)
         Sheets(sheetNum + 1).Name = clName
         '复制表头
         Sheets("总表").Range("B1:F1").Copy
@@ -580,94 +369,24 @@ Sub 横竖版()
         Subject = "考试科目：" & Sheets("说明").Range("B3")
         Group = "班级：" & Sheets("说明").Range("A" & i) & "班"
         Range("A2") = Subject & "        " & Group
-        '合并标题
-        Range("A1:Q1").Select
-        With Selection
-            .HorizontalAlignment = xlCenter
-            .VerticalAlignment = xlCenter
-            .WrapText = False
-            .Orientation = 0
-            .AddIndent = False
-            .IndentLevel = 0
-            .ShrinkToFit = False
-            .ReadingOrder = xlContext
-            .MergeCells = False
-        End With
-        Selection.Merge
-        Range("A2:Q2").Select
-        With Selection
-            .HorizontalAlignment = xlCenter
-            .VerticalAlignment = xlCenter
-            .WrapText = False
-            .Orientation = 0
-            .AddIndent = False
-            .IndentLevel = 0
-            .ShrinkToFit = False
-            .ReadingOrder = xlContext
-            .MergeCells = False
-        End With
-        Selection.Merge
-        '调整格式
-        Columns("A:Q").Select
-        Columns("A:Q").EntireColumn.AutoFit
-        rowmax5 = ActiveSheet.UsedRange.Rows.Count
-        Range("A1:Q" & rowmax5).Select
-        Selection.Borders(xlDiagonalDown).LineStyle = xlNone
-        Selection.Borders(xlDiagonalUp).LineStyle = xlNone
-        With Selection.Borders(xlEdgeLeft)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeTop)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeBottom)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlEdgeRight)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlInsideVertical)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        With Selection.Borders(xlInsideHorizontal)
-            .LineStyle = xlContinuous
-            .ColorIndex = 0
-            .TintAndShade = 0
-            .Weight = xlThin
-        End With
-        Range("A1:Q3").Select
-        With Selection.Interior
-            .Pattern = xlSolid
-            .PatternColorIndex = xlAutomatic
-            .ThemeColor = xlThemeColorAccent5
-            .TintAndShade = 0.799981688894314
-            .PatternTintAndShade = 0
-        End With
-        Range("F3").Select
-        With Selection.Font
-            .ThemeColor = xlThemeColorAccent5
-            .TintAndShade = 0.799981688894314
-        End With
-        Range("L3").Select
-        With Selection.Font
-            .ThemeColor = xlThemeColorAccent5
-            .TintAndShade = 0.799981688894314
-        End With
+        
+        '调用cmerge函数合并标题
+        cmerge ("A1:Q1")
+        cmerge ("A2:Q2")
+        
+        '调用列宽自适应函数
+        Call cfit("A:Q")
+
+        '调用表格画线函数
+        Call tline("A1", "Q")
+        
+        '调用标题上色函数
+        Call tcolor("A1:Q3")
+
+        '调用标题隐色函数
+        Call tlhide("F3")
+        Call tlhide("L3")
+        
         '调整为横向打印
         Application.PrintCommunication = False
         With ActiveSheet.PageSetup
@@ -722,64 +441,13 @@ Sub 横竖版()
             .FirstPage.RightFooter.Text = ""
         End With
         Application.PrintCommunication = True
-        '页面设置
-        Application.PrintCommunication = False
-        With ActiveSheet.PageSetup
-            .PrintTitleRows = ""
-            .PrintTitleColumns = ""
-        End With
-        Application.PrintCommunication = True
-        ActiveSheet.PageSetup.PrintArea = ""
-        Application.PrintCommunication = False
-        With ActiveSheet.PageSetup
-            .LeftHeader = ""
-            .CenterHeader = ""
-            .RightHeader = ""
-            .LeftFooter = ""
-            .CenterFooter = ""
-            .RightFooter = ""
-            .LeftMargin = Application.InchesToPoints(0.196850393700787)
-            .RightMargin = Application.InchesToPoints(0.196850393700787)
-            .TopMargin = Application.InchesToPoints(0.196850393700787)
-            .BottomMargin = Application.InchesToPoints(0.196850393700787)
-            .HeaderMargin = Application.InchesToPoints(0)
-            .FooterMargin = Application.InchesToPoints(0)
-            .PrintHeadings = False
-            .PrintGridlines = False
-            .PrintComments = xlPrintNoComments
-            .PrintQuality = 1200
-            .CenterHorizontally = False
-            .CenterVertically = False
-            .Orientation = xlPortrait
-            .Draft = False
-            .PaperSize = xlPaperA4
-            .FirstPageNumber = xlAutomatic
-            .Order = xlDownThenOver
-            .BlackAndWhite = False
-            .Zoom = 100
-            .PrintErrors = xlPrintErrorsDisplayed
-            .OddAndEvenPagesHeaderFooter = False
-            .DifferentFirstPageHeaderFooter = False
-            .ScaleWithDocHeaderFooter = True
-            .AlignMarginsHeaderFooter = True
-            .EvenPage.LeftHeader.Text = ""
-            .EvenPage.CenterHeader.Text = ""
-            .EvenPage.RightHeader.Text = ""
-            .EvenPage.LeftFooter.Text = ""
-            .EvenPage.CenterFooter.Text = ""
-            .EvenPage.RightFooter.Text = ""
-            .FirstPage.LeftHeader.Text = ""
-            .FirstPage.CenterHeader.Text = ""
-            .FirstPage.RightHeader.Text = ""
-            .FirstPage.LeftFooter.Text = ""
-            .FirstPage.CenterFooter.Text = ""
-            .FirstPage.RightFooter.Text = ""
-        End With
-        Application.PrintCommunication = True
-        ActiveWindow.View = xlNormalView
+        
+        '调用显示打印边界函数
+        Call psetting
     Next
 
 '保存
+    Windows(fName).Activate
     ThisWorkbook.Save
 
 '完成时间
@@ -791,6 +459,152 @@ Sub 横竖版()
     
     Application.ScreenUpdating = True '重启刷新
     MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
-
+    
 1
 End Sub
+Function cmerge(a) '单元格合并函数，根据传入的区域合并单元格
+
+'传入的a是一个区域，需要用双引号，比如："A1:Q1"
+    Range(a).Select
+    With Selection
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    Selection.Merge
+End Function
+
+Function cwidth(a, b) '列宽调整函数
+    Columns(a).Select '传入的a需要是带引号的连续列，如："B:N"
+    Selection.ColumnWidth = b '传入的b需要是一个数字，表示列宽
+End Function
+
+Function cfit(a) '列宽自适应函数
+    Columns(a).Select '传入的a需要是带引号的连续列，如："A:Q"
+    Columns(a).EntireColumn.AutoFit
+End Function
+
+Function tline(a, b) '可见区域画表格线函数
+    maxrow = ActiveSheet.UsedRange.Rows.Count
+    Range(a & ":" & b & maxrow).Select 'a表示左上角起始位置需要带引号，如："A1"，b表示结束位置的列号需要带引号，如："Q"，函数会自动计算右下角结束位置
+    Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+    Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+    With Selection.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlInsideVertical)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlInsideHorizontal)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+End Function
+
+Function tcolor(a) '标题上色函数
+    Range(a).Select '传入的a需要是带引号的一个区域，如："A1:Q3"，目前颜色固定为蓝色
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+End Function
+
+Function tlhide(a) '将单元格文字颜色改为与底纹颜色一致达到隐藏但又能列宽自适应的目的
+    Range(a).Select '传入的a是一个带引号的单元格，如："F3"
+    With Selection.Font
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+    End With
+End Function
+
+Function psetting() '显示打印边界函数
+    Application.PrintCommunication = False
+    With ActiveSheet.PageSetup
+        .PrintTitleRows = ""
+        .PrintTitleColumns = ""
+    End With
+    Application.PrintCommunication = True
+    ActiveSheet.PageSetup.PrintArea = ""
+    Application.PrintCommunication = False
+    With ActiveSheet.PageSetup
+        .LeftHeader = ""
+        .CenterHeader = ""
+        .RightHeader = ""
+        .LeftFooter = ""
+        .CenterFooter = ""
+        .RightFooter = ""
+        .LeftMargin = Application.InchesToPoints(0.196850393700787)
+        .RightMargin = Application.InchesToPoints(0.196850393700787)
+        .TopMargin = Application.InchesToPoints(0.196850393700787)
+        .BottomMargin = Application.InchesToPoints(0.196850393700787)
+        .HeaderMargin = Application.InchesToPoints(0)
+        .FooterMargin = Application.InchesToPoints(0)
+        .PrintHeadings = False
+        .PrintGridlines = False
+        .PrintComments = xlPrintNoComments
+        .PrintQuality = 1200
+        .CenterHorizontally = False
+        .CenterVertically = False
+        .Orientation = xlPortrait
+        .Draft = False
+        .PaperSize = xlPaperA4
+        .FirstPageNumber = xlAutomatic
+        .Order = xlDownThenOver
+        .BlackAndWhite = False
+        .Zoom = 100
+        .PrintErrors = xlPrintErrorsDisplayed
+        .OddAndEvenPagesHeaderFooter = False
+        .DifferentFirstPageHeaderFooter = False
+        .ScaleWithDocHeaderFooter = True
+        .AlignMarginsHeaderFooter = True
+        .EvenPage.LeftHeader.Text = ""
+        .EvenPage.CenterHeader.Text = ""
+        .EvenPage.RightHeader.Text = ""
+        .EvenPage.LeftFooter.Text = ""
+        .EvenPage.CenterFooter.Text = ""
+        .EvenPage.RightFooter.Text = ""
+        .FirstPage.LeftHeader.Text = ""
+        .FirstPage.CenterHeader.Text = ""
+        .FirstPage.RightHeader.Text = ""
+        .FirstPage.LeftFooter.Text = ""
+        .FirstPage.CenterFooter.Text = ""
+        .FirstPage.RightFooter.Text = ""
+    End With
+    Application.PrintCommunication = True
+    ActiveWindow.View = xlNormalView
+End Function
