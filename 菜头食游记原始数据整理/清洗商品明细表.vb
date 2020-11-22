@@ -33,7 +33,6 @@ Debug.Print "a=" & a
             Cells(i, col_1) = 0
         End If
     Cells(i, col_9) = 1
-    Cells(i, col_2) = LTrim(Str(Cells(i, col_11))) & LTrim(Str(Cells(i, col_12))) & LTrim(Str(Cells(i, col_9)))
     Next
 Application.ScreenUpdating = True '重启刷新
 MsgBox "完成"
