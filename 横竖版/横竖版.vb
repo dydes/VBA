@@ -92,13 +92,13 @@ Sub 横竖版()
         End If
     Next
 
-'按班级升序，按总分降序
+'按班级升序，按总分降序，低版本无法使用add2 key，只能用add key
     Sheets("总表").Select
     Columns("A:F").Select
     ActiveWorkbook.Worksheets("总表").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("总表").Sort.SortFields.Add2 Key:=Range("B2:B" & rowmax), _
+    ActiveWorkbook.Worksheets("总表").Sort.SortFields.Add Key:=Range("B2:B" & rowmax), _
         SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
-    ActiveWorkbook.Worksheets("总表").Sort.SortFields.Add2 Key:=Range("D2:D" & rowmax), _
+    ActiveWorkbook.Worksheets("总表").Sort.SortFields.Add Key:=Range("D2:D" & rowmax), _
         SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
     With ActiveWorkbook.Worksheets("总表").Sort
         .SetRange Range("A1:F" & rowmax)
