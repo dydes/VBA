@@ -92,7 +92,7 @@ Sub 横竖版()
         End If
     Next
 
-'按班级升序，按总分降序，低版本无法使用add2 key，只能用add key
+'按班级升序，按总分降序
     Sheets("总表").Select
     Columns("A:F").Select
     ActiveWorkbook.Worksheets("总表").Sort.SortFields.Clear
@@ -195,8 +195,8 @@ Sub 横竖版()
             Sheets("说明").Range("J" & i) = Sheets("说明").Range("B" & i) + j '左侧结束行号是起始加三分之一行数
             Sheets("说明").Range("K" & i) = Sheets("说明").Range("J" & i) + 1 '中间起始行号是左侧结束行号加1
             k = Sheets("说明").Range("K" & i)
-            Sheets("说明").Range("L" & i) = k + j - 1 '中间结束是中间起始加三分之一行数减1
-            Sheets("说明").Range("M" & i) = Sheets("说明").Range("L" & i) + 2 '右侧开始是中间结束行号加2
+            Sheets("说明").Range("L" & i) = k + j '中间结束是中间起始加三分之一行数
+            Sheets("说明").Range("M" & i) = Sheets("说明").Range("L" & i) + 1 '右侧开始是中间结束行号加1
         Else '如果被3整除
             j = Sheets("说明").Range("D" & i) / 3
             Sheets("说明").Range("J" & i) = Sheets("说明").Range("B" & i) + j - 1 '左侧结束行号是起始加三分之一行数减1
