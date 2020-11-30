@@ -3,7 +3,6 @@ Sub 等级赋分()
     
     '读取相关参数
 
-    
     Application.ScreenUpdating = False '暂停刷新
     Application.DisplayAlerts = False '暂停通知
     
@@ -21,17 +20,19 @@ Sub 等级赋分()
     tim = Format(Time, "hh时mm分ss秒") '当前时间
     tim1 = Timer
     
-    '选择“成绩排名”工作表，复制并新建文件，保存新文件，关闭源文件
+    '选择“成绩排名”工作表，复制
     Windows(ofName).Activate
     Sheets("成绩排名").Select
     Sheets("成绩排名").Copy
+    
+    '新建文件并保存新文件
     new_file = cfile & "\等级赋分-" & dat & "-" & tim & "生成.xlsx"
     ChDir cfile
     ActiveWorkbook.SaveAs Filename:=new_file, FileFormat:= _
         xlOpenXMLWorkbook, CreateBackup:=False
-    Windows(ofName).Activate
     
     '关闭源文件
+    Windows(ofName).Activate
     ActiveWorkbook.Close savechanges:=False
 
     '删除顶部多余行
@@ -49,7 +50,66 @@ Sub 等级赋分()
     成绩排名_colmax = Sheets("成绩排名").UsedRange.Columns.Count
     成绩排名_rowmax = Sheets("成绩排名").UsedRange.Rows.Count
     
+    '在生成的工作簿中新建工作表，用于记录中间值和参数
+    Sheets.Add After:=ActiveSheet
+    Sheets("Sheet2").Name = "参数"
+    Sheets("参数").Move Before:=Sheets(1) '拖拽到第一的位置
+    
+    '在参数工作表中填写列标题
+    Range("A1") = "科目"
+    Range("B1") = "是否存在"
+    
+    '创建科目数组，转置并填写到科目字段中
+    arr_sub = Array("总分", "语文", "数学", "英语", "物理", "化学", "生物", "历史", "地理", "政治")
+    Range("A2").Resize(10, 1) = Application.Transpose(arr_sub)
+    
+    '创建列标题数组，用于插列内容的判断
+    arr_insert = Array("原始班次", "原始级次", "等级", "赋分", "赋分班次", "赋分级次")
+    
+    '计算考试相关参数，用于后面的判断
+    arr_info = Array("列号", "总人数", "缺考人数", "实考人数", "前1%多少人")
+    Range("C1").Resize(1, 5) = arr_info
+        
+    '判断科目是否存在，1表示存在，0表示不存在，填写在参数表中
+    arr_col_pos = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0) '创建一个用于接收列号的空数组
+    For i = 0 To UBound(arr_sub) '逐个学科查找
+        Sheets("成绩排名").Select
+        col = Application.Match(arr_sub(i), Range(Cells(1, 1), Cells(1, 成绩排名_colmax)), 0)
+            If IsNumeric(col) = True Then '如果科目名称存在，就在参数表对应科目后面写1
+                Sheets("参数").Select
+                Row = Application.Match(arr_sub(i), Range("A2:A11"), 0)
+                Range("B" & Row + 1) = 1
+                col_a = Split(Columns(col).Address, "$")(1) '将列号转换为列标
+                arr_col_pos(i) = col_a '如果存在，逐个接收列号位置
+            Else
+                Sheets("参数").Select
+                Row = Application.Match(arr_sub(i), Range("A2:A11"), 0) '如果科目名称不存在，就在参数表对应科目后面写0
+                Range("B" & Row + 1) = 0
+                arr_col_pos(i) = 0 '如果不存在，列号为0
+            End If
+    Next
+
+    '填充列号
+    Range("C2").Resize(10, 1) = Application.Transpose(arr_col_pos)
+    
+    '统计各科人数
+    For i = 2 To 11
+        Debug.Print "i=" & i
+        j = 0
+        l = Sheets("参数").Range("C" & i)
+        Debug.Print "l=" & l
+        Sheets("成绩排名").Select
+        For k = 2 To 成绩排名_rowmax
+            If IsNumeric(Sheets("成绩排名").Range(l & k)) = False Then
+                j = j + 1
+            End If
+        Next
+        Debug.Print "j=" & j
+        Sheets("参数").Range("D" & i) = j
+    Next
+    
     '调用替换函数替换--
+    Sheets("成绩排名").Select
     Call replace("--", "")
     
     '逐列文本转数值
@@ -57,45 +117,19 @@ Sub 等级赋分()
         Range(Cells(2, i), Cells(成绩排名_rowmax, i)).TextToColumns FieldInfo:=Array(1, 1)
     Next
     
-    '新建工作表
-    Sheets.Add After:=ActiveSheet
-    Sheets("Sheet2").Name = "参数"
-    Sheets("参数").Move Before:=Sheets(1)
-    '填写列
-    Range("A1") = "科目"
-    Range("B1") = "是否存在"
-    arr_sub = Array("总分", "语文", "数学", "英语", "物理", "化学", "生物", "历史", "地理", "政治")
-    Range("A2").Resize(10, 1) = Application.Transpose(arr_sub)
-    arr_insert = Array("原始班次", "原始级次", "等级", "赋分", "赋分班次", "赋分级次")
-    Range("C1").Resize(1, 6) = arr_insert
-        
-    '判断科目是否存在
-    For i = 0 To UBound(arr_sub)
-        Debug.Print "i=" & i
-        Sheets("成绩排名").Select
-        col = Application.Match(arr_sub(i), Range(Cells(1, 1), Cells(1, 成绩排名_colmax)), 0)
-            If IsNumeric(col) = True Then
-                Sheets("参数").Select
-                Row = Application.Match(arr_sub(i), Range("A2:A11"), 0)
-                Range("B" & Row + 1) = 1
-            Else
-                Sheets("参数").Select
-                Row = Application.Match(arr_sub(i), Range("A2:A11"), 0)
-                Range("B" & Row + 1) = 0
-            End If
-    Next
-    
     '调用插列函数
     For i = 2 To 11 '参数这个sheet，循环A列的各个科目
-        
         Sheets("参数").Select
-        If Range("B" & i) = 1 Then '如果B列是1，那么该科目存在
+        If Range("B" & i) = 1 Then '如果B列是1，那么该科目存在，就插列
             j = Range("A" & i) '取出对应的科目名称
             Sheets("成绩排名").Select
-            Call insert_subcol(j, 6) '调用插列函数，在对应的列后面插入6列，等后面再把多余的删掉
-            Cells(1, (Application.Match(j, Range(Cells(1, 1), Cells(1, Columns.Count)), 0) + 1)).Resize(1, 6) = _
-            j & i '插完列之后要选中对应的列头，填充标题
-            
+            Call insert_subcol(j, 6) '调用插列函数，在对应的列后面插入6列，等后面再把多余的删掉！！！！
+            l = Application.Match(j, Range(Cells(1, 1), Cells(1, Columns.Count)), 0) '定位该科目的表头位置
+            For k = 0 To 5
+                Cells(1, l).Offset(0, k + 1) = j & arr_insert(k) '插完列之后要选中对应的列头，逐个填充标题
+            Next
+        End If
+    Next
     
     '完成时间
     tim2 = Timer
@@ -105,6 +139,7 @@ Sub 等级赋分()
     ActiveWorkbook.Save
     
     Application.ScreenUpdating = True '重启刷新
+    Application.DisplayAlerts = True '重启通知
     MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
     
 End Sub
