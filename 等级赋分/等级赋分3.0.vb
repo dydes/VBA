@@ -1,4 +1,4 @@
-Public ofile, ofName, cfile, cfName, 成绩排名_colmax, 成绩排名_rowmax
+Public ofile, ofName, cfile, cfName, 成绩排名_colmax, 成绩排名_rowmax, 参数_rowmax, 参数_rowmax_distinct
 Sub 等级赋分()
     
     '读取相关参数
@@ -57,7 +57,7 @@ Sub 等级赋分()
     
     '在参数工作表中填写列标题
     Range("A1") = "科目"
-    Range("B1") = "是否存在"
+    Range("B1") = "是否考试"
     
     '创建科目数组，转置并填写到科目字段中
     arr_sub = Array("总分", "语文", "数学", "英语", "物理", "化学", "生物", "历史", "地理", "政治")
@@ -67,8 +67,12 @@ Sub 等级赋分()
     arr_insert = Array("原始班次", "原始级次", "等级", "赋分", "赋分班次", "赋分级次")
     
     '计算考试相关参数，用于后面的判断
-    arr_info = Array("列号", "总人数", "缺考人数", "实考人数", "前1%多少人")
+    arr_info = Array("最初列号", "应考人数", "缺考人数", "实考人数", "前1%多少人")
     Range("C1").Resize(1, 5) = arr_info
+    
+    '创建班级参数矩阵，用于后面的计算
+    arr_til = Array("班级", "起始行号", "结束行号")
+    Range("A13").Resize(1, 3) = arr_til
         
     '判断科目是否存在，1表示存在，0表示不存在，填写在参数表中
     arr_col_pos = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0) '创建一个用于接收列号的空数组
@@ -79,7 +83,7 @@ Sub 等级赋分()
                 Sheets("参数").Select
                 Row = Application.Match(arr_sub(i), Range("A2:A11"), 0)
                 Range("B" & Row + 1) = 1
-                col_a = Split(Columns(col).Address, "$")(1) '将列号转换为列标
+                col_a = Split(Cells(1, col).Address, "$")(1) '将列号转换为列标
                 arr_col_pos(i) = col_a '如果存在，逐个接收列号位置
             Else
                 Sheets("参数").Select
@@ -92,30 +96,84 @@ Sub 等级赋分()
     '填充列号
     Range("C2").Resize(10, 1) = Application.Transpose(arr_col_pos)
     
-    '统计各科人数
+    '统计各科应考人数
     For i = 2 To 11
-        Debug.Print "i=" & i
+        If Sheets("参数").Range("B" & i) = 1 Then
+            Sheets("参数").Range("D" & i) = 成绩排名_rowmax
+        Else
+            Sheets("参数").Range("D" & i) = 0
+        End If
+    Next
+    
+    '统计各科缺考人数
+    For i = 2 To 11
         j = 0
         l = Sheets("参数").Range("C" & i)
-        Debug.Print "l=" & l
-        Sheets("成绩排名").Select
-        For k = 2 To 成绩排名_rowmax
-            If IsNumeric(Sheets("成绩排名").Range(l & k)) = False Then
-                j = j + 1
-            End If
-        Next
-        Debug.Print "j=" & j
-        Sheets("参数").Range("D" & i) = j
+        If l <> 0 Then
+            Sheets("成绩排名").Select
+            For k = 2 To 成绩排名_rowmax
+                If IsNumeric(Sheets("成绩排名").Range(l & k)) = False Then
+                    j = j + 1
+                End If
+            Next
+            Sheets("参数").Range("E" & i) = j
+        Else
+            Sheets("参数").Range("E" & i) = 0
+        End If
+    Next
+    
+    '统计各科实考人数
+    For i = 2 To 11
+        Sheets("参数").Range("F" & i) = Sheets("参数").Range("D" & i) - Sheets("参数").Range("E" & i)
+    Next
+    
+    '计算前1%是多少人
+    For i = 2 To 11
+        Sheets("参数").Range("G" & i) = WorksheetFunction.RoundUp(Sheets("参数").Range("F" & i) * 0.01, 0)
     Next
     
     '调用替换函数替换--
     Sheets("成绩排名").Select
-    Call replace("--", "")
+    Call replace("A1:" & Split(Cells(1, 成绩排名_colmax).Address, "$")(1) & 成绩排名_rowmax, "--", "")
     
     '逐列文本转数值
     For i = 4 To 成绩排名_colmax
         Range(Cells(2, i), Cells(成绩排名_rowmax, i)).TextToColumns FieldInfo:=Array(1, 1)
     Next
+    
+    '替换班级列的班字
+    Call replace("B2:B" & 成绩排名_rowmax, "班", "")
+    
+    '先按总分降序排列，再按班级升序排列
+    Call crange_sort("A1", "D", 1)
+    Call crange_sort("A1", "B", 0)
+    
+    '将班级内容复制到参数表中
+    Sheets("成绩排名").Select
+    Range("B2:B" & 成绩排名_rowmax).Copy
+    Sheets("参数").Select
+    Range("A14").Select
+    ActiveSheet.Paste
+    Application.CutCopyMode = False
+    
+    '找到各班起始行号，填写结束行号
+    参数_rowmax = Sheets("参数").UsedRange.Rows.Count
+    For i = 14 To 参数_rowmax
+        If Range("A" & i) <> Range("A" & i - 1) Then
+            Range("B" & i) = i - 12
+        End If
+    Next
+    Range("B14") = 2
+    
+    '去重，得到不重复的班号
+    ActiveSheet.Range("$A$14:$C$" & 成绩排名_rowmax + 13).RemoveDuplicates Columns:=1, Header:=xlNo
+    
+    '填写结束行号
+    参数_rowmax_distinct = Sheets("参数").UsedRange.Rows.Count
+    For i = 14 To 参数_rowmax_distinct
+        Range("C" & i) = Range("B" & i + 1) - 1
+    Next
+    Range("C" & 参数_rowmax_distinct) = 成绩排名_rowmax
     
     '调用插列函数
     For i = 2 To 11 '参数这个sheet，循环A列的各个科目
@@ -130,6 +188,29 @@ Sub 等级赋分()
             Next
         End If
     Next
+    
+    '删除不需要的列
+    arr_delcol = Array("总分", "语文", "数学", "英语")
+    For i = 0 To 3
+        If Sheets("参数").Range("B" & i + 2) = 1 Then
+            Call del_qcol(arr_delcol(i) & "等级", "A1:DD1")
+            Call del_qcol(arr_delcol(i) & "赋分", "A1:DD1")
+            Call del_qcol(arr_delcol(i) & "赋分班次", "A1:DD1")
+            Call del_qcol(arr_delcol(i) & "赋分级次", "A1:DD1")
+        End If
+    Next
+    
+    '计算原始班次和级次
+    For i = 2 To 11
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets("成绩排名").Select
+            Call group_rank(Sheets("参数").Range("A" & i) & "原始班次")
+            Call grade_rank(Sheets("参数").Range("A" & i) & "原始级次")
+        End If
+    Next
+    
+    '计算相对排名
+    
     
     '完成时间
     tim2 = Timer
@@ -175,8 +256,9 @@ Function file_save_name(til, ifilname) 'til是文件选择器标题，ifilname�
 End Function
 
 'rbef表示替换什么，rlat表示替换后是什么，数字字符均可，字符用双引号'
-Function replace(rbef, rlat)
-    Range("A1").CurrentRegion.replace What:=rbef, Replacement:=rlat, LookAt:=xlPart, _
+Function replace(rang, rbef, rlat)
+    Range(rang).Select
+    Selection.replace What:=rbef, Replacement:=rlat, LookAt:=xlPart, _
     SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
     ReplaceFormat:=False
 End Function
@@ -188,4 +270,46 @@ Function insert_subcol(a, b) '参数a是需要找的列标题，参数b是需要
     Next
 End Function
 
+Function crange_sort(ref, key, order) '三个参数：ref表示排序的区域，随便给个A1就行，key表示排序的关键字是哪个字段，order0升序，1降序
+'如果是希望排多个字段，需要把权重最高的放在最后
+    If order = 0 Then '升序
+        Range(ref).CurrentRegion.Sort key1:=Range(key & "1"), order1:=xlAscending, Header:=xlYes
+    ElseIf order = 1 Then '降序
+        Range(ref).CurrentRegion.Sort key1:=Range(key & "1"), order1:=xlDescending, Header:=xlYes
+    ElseIf order <> 0 Or order <> 1 Then
+        Exit Function
+    End If
+End Function
 
+Function del_qcol(a, b) '参数a是需要搜索的列名，如："付款时间"，参数b是查找范围，如："A1:AZ1"
+    Columns(Application.Match(a, Range(b), 0)).Select
+    Selection.Delete Shift:=xlToLeft    '删除列，默认右侧单元格左移
+End Function
+
+Function group_rank(x)
+    '计算原始班次,传入一个列标题名称，定位到该列，循环计算各班班级名次，如：总分原始班次
+    y = Application.Match(x, Range("A1:DD1"), 0)
+    For i = 14 To 参数_rowmax_distinct
+        a = Sheets("参数").Range("B" & i)
+        b = Sheets("参数").Range("C" & i)
+        For j = a To b
+            Sheets("成绩排名").Select
+            If Cells(j, y - 1) <> "" Then
+                Cells(j, y) = WorksheetFunction.Rank(Cells(j, y - 1), Range(Cells(a, y - 1), Cells(b, y - 1)))
+            End If
+        Next
+    Next
+End Function
+
+Function grade_rank(x)
+    '计算原始级次,传入一个列标题名称，定位到该列，计算年级名次，如：总分原始级次
+    y = Application.Match(x, Range("A1:DD1"), 0)
+    a = Sheets("参数").Range("B14")
+    b = Sheets("参数").Range("C" & 参数_rowmax_distinct)
+    For j = a To b
+        Sheets("成绩排名").Select
+        If Cells(j, y - 2) <> "" Then
+            Cells(j, y) = WorksheetFunction.Rank(Cells(j, y - 2), Range(Cells(a, y - 2), Cells(b, y - 2)))
+        End If
+    Next
+End Function
