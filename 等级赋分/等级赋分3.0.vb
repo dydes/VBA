@@ -1,4 +1,4 @@
-Public ofile, ofName, cfile, cfName, 成绩排名_colmax, 成绩排名_rowmax, 参数_rowmax, 参数_rowmax_distinct
+Public ofile, ofName, cfile, cfName, 成绩排名_colmax, 成绩排名_rowmax, 参数_rowmax, 参数_rowmax_distinct, arr_sub
 Sub 等级赋分()
     
     '读取相关参数
@@ -46,6 +46,13 @@ Sub 等级赋分()
             MsgBox "未找到学生学号字段，请确认文件是否正确"
         End If
         
+    '删除不需要的列
+    For i = 1 To 12
+        Call del_col_key("班级排名", "A1:AF1")
+        Call del_col_key("年级排名", "A1:AF1")
+    Next
+    Call del_col_key("语数外总分", "A1:AF1")
+    
     '求成绩排名工作表最大行数列数
     成绩排名_colmax = Sheets("成绩排名").UsedRange.Columns.Count
     成绩排名_rowmax = Sheets("成绩排名").UsedRange.Rows.Count
@@ -67,34 +74,15 @@ Sub 等级赋分()
     arr_insert = Array("原始班次", "原始级次", "等级", "赋分", "赋分班次", "赋分级次")
     
     '计算考试相关参数，用于后面的判断
-    arr_info = Array("最初列号", "应考人数", "缺考人数", "实考人数", "前1%多少人")
+    arr_info = Array("所在列号", "应考人数", "缺考人数", "实考人数", "前1%多少人")
     Range("C1").Resize(1, 5) = arr_info
     
     '创建班级参数矩阵，用于后面的计算
     arr_til = Array("班级", "起始行号", "结束行号")
     Range("A13").Resize(1, 3) = arr_til
         
-    '判断科目是否存在，1表示存在，0表示不存在，填写在参数表中
-    arr_col_pos = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0) '创建一个用于接收列号的空数组
-    For i = 0 To UBound(arr_sub) '逐个学科查找
-        Sheets("成绩排名").Select
-        col = Application.Match(arr_sub(i), Range(Cells(1, 1), Cells(1, 成绩排名_colmax)), 0)
-            If IsNumeric(col) = True Then '如果科目名称存在，就在参数表对应科目后面写1
-                Sheets("参数").Select
-                Row = Application.Match(arr_sub(i), Range("A2:A11"), 0)
-                Range("B" & Row + 1) = 1
-                col_a = Split(Cells(1, col).Address, "$")(1) '将列号转换为列标
-                arr_col_pos(i) = col_a '如果存在，逐个接收列号位置
-            Else
-                Sheets("参数").Select
-                Row = Application.Match(arr_sub(i), Range("A2:A11"), 0) '如果科目名称不存在，就在参数表对应科目后面写0
-                Range("B" & Row + 1) = 0
-                arr_col_pos(i) = 0 '如果不存在，列号为0
-            End If
-    Next
-
-    '填充列号
-    Range("C2").Resize(10, 1) = Application.Transpose(arr_col_pos)
+    '调用科目获取列号函数
+    Call colpos
     
     '统计各科应考人数
     For i = 2 To 11
@@ -209,8 +197,43 @@ Sub 等级赋分()
         End If
     Next
     
-    '计算相对排名
+    '计算等级赋分
+    For i = 6 To 11
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets("成绩排名").Select
+            Call level_score(Sheets("参数").Range("A" & i))
+        End If
+    Next
     
+    '计算赋分班次和级次
+    For i = 6 To 11
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets("成绩排名").Select
+            Call group_rank(Sheets("参数").Range("A" & i) & "赋分班次")
+            Call grade_rank(Sheets("参数").Range("A" & i) & "赋分级次")
+        End If
+    Next
+    
+    '设置边框线
+    With Range("A1").CurrentRegion.Borders
+        .LineStyle = xlContinuous
+    End With
+    
+    '设置表头样式
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    With Selection.Interior
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+    End With
+    Selection.Font.Bold = True
+    
+    '重新求成绩排名工作表最大行数列数
+    Debug.Print "这里重新计算了列数"
+    成绩排名_colmax = Sheets("成绩排名").UsedRange.Columns.Count
+    
+    '重新定位各科所在列，调用科目获取列号函数
+    Call colpos
     
     '完成时间
     tim2 = Timer
@@ -270,6 +293,14 @@ Function insert_subcol(a, b) '参数a是需要找的列标题，参数b是需要
     Next
 End Function
 
+Function del_col_key(a, b) '参数a表示要查找的中文，如"订单状态"，参数b表示一个查询范围，如："A1:AZ1"
+Do
+  colx = Application.Match(a, Range(b), 0)
+  If IsNumeric(colx) = False Then Exit Do
+    Columns(colx).Delete
+Loop
+End Function
+
 Function crange_sort(ref, key, order) '三个参数：ref表示排序的区域，随便给个A1就行，key表示排序的关键字是哪个字段，order0升序，1降序
 '如果是希望排多个字段，需要把权重最高的放在最后
     If order = 0 Then '升序
@@ -312,4 +343,113 @@ Function grade_rank(x)
             Cells(j, y) = WorksheetFunction.Rank(Cells(j, y - 2), Range(Cells(a, y - 2), Cells(b, y - 2)))
         End If
     Next
+End Function
+
+Function level_score(x)
+    y = Application.Match(x & "等级", Range("A1:DD1"), 0)
+    Z = Application.Match(x, Sheets("参数").Range("A1:A11"), 0)
+    a = Sheets("参数").Range("B14")
+    b = Sheets("参数").Range("C" & 参数_rowmax_distinct)
+    '计算相对排名
+    For i = a To b
+        rnk = Sheets("成绩排名").Cells(i, y - 1)
+        num = Sheets("参数").Range("F" & Z)
+        If num = 0 Then
+            rnk_rate = 0
+        Else
+            rnk_rate = rnk / num
+        End If
+        '根据相对排名计算等级和赋分
+        Select Case rnk_rate
+            Case Is = 0
+                Sheets("成绩排名").Cells(i, y) = ""
+                Sheets("成绩排名").Cells(i, y + 1) = ""
+            Case Is <= 0.01
+                Sheets("成绩排名").Cells(i, y) = "A1"
+                Sheets("成绩排名").Cells(i, y + 1) = 100
+            Case Is <= 0.03
+                Sheets("成绩排名").Cells(i, y) = "A2"
+                Sheets("成绩排名").Cells(i, y + 1) = 97
+            Case Is <= 0.06
+                Sheets("成绩排名").Cells(i, y) = "A3"
+                Sheets("成绩排名").Cells(i, y + 1) = 94
+            Case Is <= 0.1
+                Sheets("成绩排名").Cells(i, y) = "A4"
+                Sheets("成绩排名").Cells(i, y + 1) = 91
+            Case Is <= 0.15
+                Sheets("成绩排名").Cells(i, y) = "A5"
+                Sheets("成绩排名").Cells(i, y + 1) = 88
+            Case Is <= 0.21
+                Sheets("成绩排名").Cells(i, y) = "B1"
+                Sheets("成绩排名").Cells(i, y + 1) = 85
+            Case Is <= 0.28
+                Sheets("成绩排名").Cells(i, y) = "B2"
+                Sheets("成绩排名").Cells(i, y + 1) = 82
+            Case Is <= 0.36
+                Sheets("成绩排名").Cells(i, y) = "B3"
+                Sheets("成绩排名").Cells(i, y + 1) = 79
+            Case Is <= 0.43
+                Sheets("成绩排名").Cells(i, y) = "B4"
+                Sheets("成绩排名").Cells(i, y + 1) = 76
+            Case Is <= 0.5
+                Sheets("成绩排名").Cells(i, y) = "B5"
+                Sheets("成绩排名").Cells(i, y + 1) = 73
+            Case Is <= 0.57
+                Sheets("成绩排名").Cells(i, y) = "C1"
+                Sheets("成绩排名").Cells(i, y + 1) = 70
+            Case Is <= 0.64
+                Sheets("成绩排名").Cells(i, y) = "C2"
+                Sheets("成绩排名").Cells(i, y + 1) = 67
+            Case Is <= 0.71
+                Sheets("成绩排名").Cells(i, y) = "C3"
+                Sheets("成绩排名").Cells(i, y + 1) = 64
+            Case Is <= 0.78
+                Sheets("成绩排名").Cells(i, y) = "C4"
+                Sheets("成绩排名").Cells(i, y + 1) = 61
+            Case Is <= 0.84
+                Sheets("成绩排名").Cells(i, y) = "C5"
+                Sheets("成绩排名").Cells(i, y + 1) = 58
+            Case Is <= 0.89
+                Sheets("成绩排名").Cells(i, y) = "D1"
+                Sheets("成绩排名").Cells(i, y + 1) = 55
+            Case Is <= 0.93
+                Sheets("成绩排名").Cells(i, y) = "D2"
+                Sheets("成绩排名").Cells(i, y + 1) = 52
+            Case Is <= 0.96
+                Sheets("成绩排名").Cells(i, y) = "D3"
+                Sheets("成绩排名").Cells(i, y + 1) = 49
+            Case Is <= 0.98
+                Sheets("成绩排名").Cells(i, y) = "D4"
+                Sheets("成绩排名").Cells(i, y + 1) = 46
+            Case Is <= 0.99
+                Sheets("成绩排名").Cells(i, y) = "D5"
+                Sheets("成绩排名").Cells(i, y + 1) = 43
+            Case Is <= 1
+                Sheets("成绩排名").Cells(i, y) = "E"
+                Sheets("成绩排名").Cells(i, y + 1) = 40
+        End Select
+    Next
+End Function
+
+Function colpos()
+'判断科目是否存在，1表示存在，0表示不存在，填写在参数表中
+arr_col_pos = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0) '创建一个用于接收列号的空数组
+For i = 0 To UBound(arr_sub) '逐个学科查找
+    Sheets("成绩排名").Select
+    col = Application.Match(arr_sub(i), Range(Cells(1, 1), Cells(1, 成绩排名_colmax)), 0)
+        If IsNumeric(col) = True Then '如果科目名称存在，就在参数表对应科目后面写1
+            Sheets("参数").Select
+            Row = Application.Match(arr_sub(i), Range("A2:A11"), 0)
+            Range("B" & Row + 1) = 1
+            col_a = Split(Cells(1, col).Address, "$")(1) '将列号转换为列标
+            arr_col_pos(i) = col_a '如果存在，逐个接收列号位置
+        Else
+            Sheets("参数").Select
+            Row = Application.Match(arr_sub(i), Range("A2:A11"), 0) '如果科目名称不存在，就在参数表对应科目后面写0
+            Range("B" & Row + 1) = 0
+            arr_col_pos(i) = 0 '如果不存在，列号为0
+        End If
+Next
+'填充列号
+Range("C2").Resize(10, 1) = Application.Transpose(arr_col_pos)
 End Function
