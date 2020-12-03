@@ -235,6 +235,21 @@ Sub 等级赋分()
     '重新定位各科所在列，调用科目获取列号函数
     Call colpos
     
+    '关键列上色
+    For i = 2 To 11
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets("成绩排名").Select
+            Range(Sheets("参数").Range("C" & i) & 1).Select
+            With Selection.Interior
+                .ThemeColor = xlThemeColorAccent5
+                .TintAndShade = 0.799981688894314
+            End With
+        End If
+    Next
+    
+    '创建各科sheet，复制总分列内容
+    
+    
     '完成时间
     tim2 = Timer
     using_time = tim2 - tim1
