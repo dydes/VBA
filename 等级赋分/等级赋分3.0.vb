@@ -229,7 +229,6 @@ Sub 等级赋分()
     Selection.Font.Bold = True
     
     '重新求成绩排名工作表最大行数列数
-    Debug.Print "这里重新计算了列数"
     成绩排名_colmax = Sheets("成绩排名").UsedRange.Columns.Count
     
     '重新定位各科所在列，调用科目获取列号函数
@@ -241,14 +240,92 @@ Sub 等级赋分()
             Sheets("成绩排名").Select
             Range(Sheets("参数").Range("C" & i) & 1).Select
             With Selection.Interior
-                .ThemeColor = xlThemeColorAccent5
+                .ThemeColor = xlThemeColorAccent2
                 .TintAndShade = 0.799981688894314
             End With
         End If
     Next
     
     '创建各科sheet，复制总分列内容
+    For i = 2 To 11
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets.Add After:=Sheets(Sheets.Count)
+            Sheets(Sheets.Count).Name = Sheets("参数").Range("A" & i)
+        End If
+    Next
     
+    '统一复制相关列，并冻结窗格
+    If Sheets("参数").Range("B2") = 0 Then
+        total_sub = 3
+        Sheets("成绩排名").Range("A:C").Copy
+    Else
+        total_sub = 6
+        Sheets("成绩排名").Range("A:F").Copy
+    End If
+    For i = 2 To 11
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets(Sheets("参数").Range("A" & i).Text).Select
+            Range("A1").Select
+            ActiveSheet.Paste
+        End If
+        Range("D2").Select
+        ActiveWindow.FreezePanes = True
+    Next
+    
+    '复制语数外各科相关列
+    For i = 3 To 5
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets("成绩排名").Select
+            aa = Sheets("参数").Range("C" & i)
+            end_col_num = Sheets("成绩排名").Range(aa & 1).Column + 2
+            end_col = Split(Cells(1, end_col_num).Address, "$")(1)
+            Range(Sheets("参数").Range("C" & i) & ":" & end_col).Copy
+            Sheets(Sheets("参数").Range("A" & i).Text).Select
+            If total_sub = 3 Then
+                Range("D1").Select
+                ActiveSheet.Paste
+            Else
+                Range("G1").Select
+                ActiveSheet.Paste
+            End If
+        End If
+    Next
+    
+    '复制小科相关列
+    For i = 6 To 11
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets("成绩排名").Select
+            aa = Sheets("参数").Range("C" & i)
+            end_col_num = Sheets("成绩排名").Range(aa & 1).Column + 6
+            end_col = Split(Cells(1, end_col_num).Address, "$")(1)
+            Range(Sheets("参数").Range("C" & i) & ":" & end_col).Copy
+            Sheets(Sheets("参数").Range("A" & i).Text).Select
+            If total_sub = 3 Then
+                Range("D1").Select
+                ActiveSheet.Paste
+            Else
+                Range("G1").Select
+                ActiveSheet.Paste
+            End If
+        End If
+    Next
+
+    '隔行标色
+    For i = 2 To 11
+        If Sheets("参数").Range("B" & i) <> 0 Then
+            Sheets(Sheets("参数").Range("A" & i).Text).Select
+            With Range("Z1:Z" & 成绩排名_rowmax)         '在Z列输入公式作为辅助区
+                .Formula = "=if(mod(row(),2),1,0/0)" '列号为除以2余数为1时显示1,否则显示一个0/0的错误值
+                Set Rng = .SpecialCells(xlCellTypeFormulas, 16).EntireRow '参数16表示错误值
+                Rng.Select                           '选择目标行
+                With Selection.Interior
+                    .ThemeColor = xlThemeColorDark1
+                    .TintAndShade = -4.99893185216834E-02
+                End With
+                Range("Z1:Z" & 成绩排名_rowmax).Value = "" '清空输入区数据
+            End With
+        End If
+    Next
     
     '完成时间
     tim2 = Timer
