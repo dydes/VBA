@@ -1,15 +1,103 @@
-Public 原始分数_rowmax, 原始分数_colmax, arr_sub, arr_col_pos, arr_region
+Public tNAme, ofile, ofName, cfile, cfName, rowmax, colmax, arr_region
+Sub auto_open()
+
+'系统提示
+'
+    mb = "· 成绩管理员：" + Chr(13) + Chr(13)
+    mb = mb + "  1.请从会课教学平台导出“xxxx考试（全年级）-全科”表；" + Chr(13)
+    mb = mb + "  2.按组合键“ctrl + J”后，请选择导出的表格；" + Chr(13)
+    mb = mb + "  3.请不要更改表头结构及标题，以免影响整个系统的使用。" + Chr(13) + Chr(13)
+    mb = mb + "· 学校及年级主管领导：" + Chr(13) + Chr(13)
+    mb = mb + "  1.“确定”后，可直接浏览成绩分析；" + Chr(13)
+    mb = mb + "  2.根据需要，还可更改“平均成绩一览”“优秀生分布”“分数段统计”中红颜色的数据。" + Chr(13)
+    MsgBox mb, , "系统提示"
+End Sub
+
 Sub data()
 
-    tim1 = Timer
     Application.ScreenUpdating = False '暂停刷新
     Application.DisplayAlerts = False '暂停通知
 
-'获取原始分数表最大行数列数
-    原始分数_rowmax = Sheets("原始分数").UsedRange.Rows.Count
-    原始分数_colmax = Sheets("原始分数").UsedRange.Columns.Count
+'获取cj表最大行数列数
+    rowmax = Sheets("cj").UsedRange.Rows.Count
+    colmax = Sheets("cj").UsedRange.Columns.Count
+    
+'获取工作簿名称
+    tNAme = ThisWorkbook.Name
+
+'清除现有分数数据
+    Range("A2:M" & rowmax).ClearContents
+
+'调用选文件函数，输出ofile是带路径的文件名，ofName是不带路径的文件名
+    Call file_open_name("请选择年级全科文件", "D:\会通\VBA\唐县一中\")
+
+'计时
+    tim1 = Timer
+
+'打开文件
+    Workbooks.Open (ofile)
+
+'选择“成绩排名”工作表
+    Windows(ofName).Activate
+    Sheets("成绩排名").Select
+
+'删除顶部多余行
+    top_rows = Application.Match("学生学号", Range("A1:A100"), 0) - 1
+        If top_rows > 0 Then
+            Rows("1:" & top_rows).Delete Shift:=xlUp
+        ElseIf top_rows = 0 Then
+            Range("A1").Select
+        Else
+            MsgBox "未找到学生学号字段，请确认文件是否正确"
+        End If
+
+'更新最大行数列数
+    rowmax = Sheets("成绩排名").UsedRange.Rows.Count
+    colmax = Sheets("成绩排名").UsedRange.Columns.Count
+    
+'判断内容多少
+    Windows(tNAme).Activate
+    Sheets("cj").Select
+    rowmax1 = Sheets("cj").UsedRange.Rows.Count
+    If rowmax1 > rowmax Then
+        Rows(rowmax & ":" & rowmax1).Delete Shift:=xlUp
+    ElseIf rowmax1 = rowmax Then GoTo 2
+    Else
+        Range("N" & rowmax1 & ":W" & rowmax1).Copy
+        Range("N" & rowmax1 & ":W" & rowmax).Paste
+    End If
+2
+    
+'定义科目数组
+    arr_sub_huike = Array("学生学号", "姓名", "班级", "总分", "语文", "数学", "英语", "物理", "化学", "生物", "历史", "地理", "政治")
+    arr_sub_cj = Array("考号", "姓名", "班级代码", "总成绩", "语文", "数学", "外语", "物理", "化学", "生物", "历史", "地理", "政治")
+    
+'逐列复制内容
+    For i = 0 To 12
+        Windows(ofName).Activate
+        Sheets("成绩排名").Select
+            colx = Application.Match(arr_sub_huike(i), Range("A1:AZ1"), 0)
+            If IsNumeric(colx) = False Then GoTo 1
+                Range(Cells(2, colx), Cells(rowmax, colx)).Copy
+                Windows(tNAme).Activate
+                Sheets("cj").Select
+                coly = Application.Match(arr_sub_cj(i), Range("A1:AZ1"), 0)
+                Cells(2, coly).Select
+                Selection.PasteSpecial Paste:=xlPasteValues
+1
+    Application.StatusBar = "自动粘贴中" & GetProgress(i, 13)
+    Next
+
+'关闭源文件且不保存
+    Windows(ofName).Activate
+    ActiveWorkbook.Close savechanges:=False
+    
+'替换--
+    Call replace("D2:M" & rowmax, "--", 0)
 
 '定义自定义区域名称数组
+    Windows(tNAme).Activate
+    Sheets("cj").Select
     arr_region = Array("bc", "score", _
                         "_f1", "_f2", "_f3", "_f4", "_f5", "_f6", "_f7", "_f8", "_f9", _
                         "mc", "mc1", "mc2", "mc3", "mc4", "mc5", "mc6", "mc7", "mc8", "mc9", _
@@ -23,231 +111,52 @@ Sub data()
     ActiveWorkbook.Names.Add Name:="yxs", RefersToR1C1:="='优秀生分布'!R2C7:R2C7"
     ActiveWorkbook.Names.Add Name:="fd", RefersToR1C1:="='分数段统计'!R2C11:R2C11"
     ActiveWorkbook.Names.Add Name:="dxf", RefersToR1C1:="='分数段统计'!R2C14:R2C14"
-   
-'创建班级参数矩阵，用于后面的计算
-    Sheets("使用说明").Range("A7") = "班级"
-    Sheets("使用说明").Range("B7") = "起始行号"
-    Sheets("使用说明").Range("C7") = "结束行号"
-    
-'将班级内容复制到参数表中
-    Sheets("原始分数").Select
-    Range("C2:C" & 原始分数_rowmax).Copy
-    Sheets("使用说明").Select
-    Range("A8").Select
-    ActiveSheet.Paste
-    Application.CutCopyMode = False
-    
-'找到各班起始行号，填写结束行号
-    使用说明_rowmax = Sheets("使用说明").UsedRange.Rows.Count
-    For i = 8 To 使用说明_rowmax
-        If Range("A" & i) <> Range("A" & i - 1) Then
-            Range("B" & i) = i - 6
-        End If
-    Next
-    
-'去重，得到不重复的班号
-    ActiveSheet.Range("$A$8:$C$" & 原始分数_rowmax + 7).RemoveDuplicates Columns:=1, Header:=xlNo
-    
-'填写结束行号
-    使用说明_rowmax_distinct = Sheets("使用说明").UsedRange.Rows.Count
-    For i = 8 To 使用说明_rowmax_distinct
-        Range("C" & i) = Range("B" & i + 1) - 1
-    Next
-    Range("C" & 使用说明_rowmax_distinct) = 原始分数_rowmax
 
 '制作各科班名次()
-    Sheets("原始分数").Select
-    For i = 4 To 13
-        Call crange_sort(i, 1)
-        Call crange_sort(3, 0)
-        For k = 8 To 使用说明_rowmax_distinct
-            a = Sheets("使用说明").Range("B" & k)
-            b = Sheets("使用说明").Range("C" & k)
-            For j = 2 To 原始分数_rowmax
-                If Cells(j, i) <> "" Then
-                    Cells(j, i + 20) = WorksheetFunction.Rank(Cells(j, i), Range(Cells(a, i), Cells(b, i)))
-                End If
-            Next
-        Next
+'
+    Sheets("cj").Select
+    arr_f = Array("D", "E", "F", "G", "H", "I", "J", "K", "L", "M")
+    arr_bmc = Array("X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG")
+    arr_loc = Array(-21, -22, -23, -24, -25, -26, -27, -28, -29, -30)
+
+    For i = 0 To 9
+        Range("A1:AG" & rowmax).Sort _
+            Key1:=Range("C2"), Order1:=xlAscending, _
+            Key2:=Range(arr_f(i) & "2"), Order2:=xlDescending, _
+            Header:=xlYes
+        Range(arr_bmc(i) & 2).FormulaR1C1 = "1"
+        Range(arr_bmc(i) & 3).FormulaR1C1 = "=IF(RC[" & arr_loc(i) & "]=R[-1]C[" & arr_loc(i) & "],R[-1]C+1,1)"
+        Range(arr_bmc(i) & 3).AutoFill Destination:=Range(arr_bmc(i) & "3:" & arr_bmc(i) & rowmax)
+        Range(arr_bmc(i) & 2).Select
+        Range(Selection, Selection.End(xlDown)).Copy
+        Selection.PasteSpecial Paste:=xlPasteValues
+        Application.CutCopyMode = False
+    Application.StatusBar = "计算班级名称" & GetProgress(i, 10)
     Next
     
-''定义bmc(f1)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("E2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("Y2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("Y3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-22]=R[-1]C[-22],R[-1]C+1,1)"
-'    Range("Y3").Select
-'    Selection.AutoFill Destination:=Range("Y3:Y" & 原始分数_rowmax)
-'    Range("Y2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
+'回到原记录顺序
 '
-''定义bmc(f2)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("F2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("Z2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("Z3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-23]=R[-1]C[-23],R[-1]C+1,1)"
-'    Range("Z3").Select
-'    Selection.AutoFill Destination:=Range("Z3:Z" & 原始分数_rowmax)
-'    Range("Z2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
-'
-''定义bmc(f3)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("G2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("AA2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("AA3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-24]=R[-1]C[-24],R[-1]C+1,1)"
-'    Range("AA3").Select
-'    Selection.AutoFill Destination:=Range("AA3:AA" & 原始分数_rowmax)
-'    Range("AA2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
-'
-''定义bmc(f4)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("H2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("AB2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("AB3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-25]=R[-1]C[-25],R[-1]C+1,1)"
-'    Range("AB3").Select
-'    Selection.AutoFill Destination:=Range("AB3:AB" & 原始分数_rowmax)
-'    Range("AB2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
-'
-''定义bmc(f5)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("I2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("AC2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("AC3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-26]=R[-1]C[-26],R[-1]C+1,1)"
-'    Range("AC3").Select
-'    Selection.AutoFill Destination:=Range("AC3:AC" & 原始分数_rowmax)
-'    Range("AC2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
-'
-''定义bmc(f6)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("J2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("AD2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("AD3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-27]=R[-1]C[-27],R[-1]C+1,1)"
-'    Range("AD3").Select
-'    Selection.AutoFill Destination:=Range("AD3:AD" & 原始分数_rowmax)
-'    Range("AD2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
-'
-''定义bmc(f7)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("K2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("AE2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("AE3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-28]=R[-1]C[-28],R[-1]C+1,1)"
-'    Range("AE3").Select
-'    Selection.AutoFill Destination:=Range("AE3:AE" & 原始分数_rowmax)
-'    Range("AE2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
-'
-''定义bmc(f8)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("L2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("AF2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("AF3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-29]=R[-1]C[-29],R[-1]C+1,1)"
-'    Range("AF3").Select
-'    Selection.AutoFill Destination:=Range("AF3:AF" & 原始分数_rowmax)
-'    Range("AF2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
-'
-''定义bmc(f9)
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("C2"), order1:=xlAscending, Key2:= _
-'        Range("M2"), Order2:=xlDescending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
-'    Range("AG2").Select
-'    ActiveCell.FormulaR1C1 = "1"
-'    Range("AG3").Select
-'    ActiveCell.FormulaR1C1 = "=IF(RC[-30]=R[-1]C[-30],R[-1]C+1,1)"
-'    Range("AG3").Select
-'    Selection.AutoFill Destination:=Range("AG3:AG" & 原始分数_rowmax)
-'    Range("AG2").Select
-'    Range(Selection, Selection.End(xlDown)).Select
-'    Selection.Copy
-'    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-'        :=False, Transpose:=False
-'    Application.CutCopyMode = False
-    
-''回到原记录顺序
-''
-'    Range("A1:AG" & 原始分数_rowmax).Sort key1:=Range("A2"), order1:=xlAscending, Header:=xlYes, OrderCustom:=1, _
-'        MatchCase:=False, Orientation:=xlTopToBottom, SortMethod:=xlPinYin, _
-'        DataOption1:=xlSortNormal
+    Range("A1:AG" & rowmax).Sort _
+        Key1:=Range("A2"), Order1:=xlAscending, _
+        Header:=xlYes
 
+'设置边框线
+    With Range("A1").CurrentRegion.Borders
+        .LineStyle = xlContinuous
+    End With
+    
+'设置表头样式
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    With Selection.Interior
+        .ThemeColor = xlThemeColorAccent5
+        .TintAndShade = 0.799981688894314
+    End With
+    Selection.Font.Bold = True
+
+'调整列宽和行高
+    Columns("A:AG").EntireColumn.AutoFit
+    Rows("1:" & rowmax).EntireRow.AutoFit
 
 '完成时间
     tim2 = Timer
@@ -258,39 +167,53 @@ Sub data()
     
     Application.ScreenUpdating = True '重启刷新
     Application.DisplayAlerts = True '重启通知
-    MsgBox "计算完成，用时" & Format(using_time, "0.0秒")
-    
+    Application.StatusBar = "已完成"
+    MsgBox "数据制作完成，谢谢使用！！用时" & Format(using_time, "0.0秒")
+
 End Sub
+
+Function file_open_name(til, ifilname) 'til是文件选择器标题，ifilname是默认打开路径
+'先选择文件，获取路径，若未选择任何文件，终止程序，输出ofile是带路径的文件名，ofName是不带路径的文件名
+    With Application.FileDialog(msoFileDialogFilePicker)
+        .Title = til
+        .InitialFileName = ifilname
+        If .Show Then
+            ofile = .SelectedItems(1)
+            Else: Exit Function
+        End If
+    End With
+'用斜杠分割文件路径，创建数组，选取数组最后一个元素做为不含路径的文件名
+    splfile = Split(ofile, "\")
+    ofName = splfile(UBound(splfile))
+End Function
 
 Function dele_new_vars()
 '根据名称数组，逐个删除已有名称，新建对应名称的区域
+    Windows(tNAme).Activate
     For i = 0 To UBound(arr_region)
         ActiveWorkbook.Names(arr_region(i)).Delete
-        ActiveWorkbook.Names.Add Name:=arr_region(i), RefersToR1C1:="='原始分数'!R2C" & i + 3 & ":R" & 原始分数_rowmax & "C" & i + 3
+        ActiveWorkbook.Names.Add Name:=arr_region(i), RefersToR1C1:="='cj'!R2C" & i + 3 & ":R" & rowmax & "C" & i + 3
+    Application.StatusBar = "自动命名" & GetProgress(i, UBound(arr_region) + 1)
     Next
 End Function
 
-Function sub_col()
-'判断科目是否存在，存在记录具体列号，不存在记0
-    arr_col_pos = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0) '创建一个用于接收列号的空数组
-    For i = 0 To UBound(arr_sub) '逐个学科查找
-        Sheets("原始分数").Select
-        col = Application.Match(arr_sub(i), Range(Cells(1, 1), Cells(1, 原始分数_colmax)), 0)
-            If IsNumeric(col) = True Then '如果科目名称存在，就记列号
-                arr_col_pos(i) = col
-            Else
-                arr_col_pos(i) = 0 '如果不存在，列号为0
-            End If
-    Next
+Function GetProgress(curValue, maxValue)
+Dim i As Single, j As Integer, s As String
+    i = maxValue / 20
+    j = curValue / i
+    For M = 1 To j
+        s = s & "■"
+    Next M
+    For n = 1 To 20 - j
+        s = s & "□"
+    Next n
+    GetProgress = s & FormatNumber(curValue / maxValue * 100, 2) & "%"
 End Function
 
-Function crange_sort(key, order) '三个参数：ref表示排序的区域，随便给个A1就行，key表示排序的关键字是哪个字段，order0升序，1降序
-'如果是希望排多个字段，需要把权重最高的放在最后
-    If order = 0 Then '升序
-        Range("A1").CurrentRegion.Sort key1:=Cells(1, key), order1:=xlAscending, Header:=xlYes
-    ElseIf order = 1 Then '降序
-        Range("A1").CurrentRegion.Sort key1:=Cells(1, key), order1:=xlDescending, Header:=xlYes
-    ElseIf order <> 0 Or order <> 1 Then
-        Exit Function
-    End If
+'rbef表示替换什么，rlat表示替换后是什么，数字字符均可，字符用双引号'
+Function replace(rang, rbef, rlat)
+    Range(rang).Select
+    Selection.replace What:=rbef, Replacement:=rlat, LookAt:=xlPart, _
+    SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+    ReplaceFormat:=False
 End Function
