@@ -17,16 +17,6 @@ arr_remark = Range("B2:B" & rowmax)
 '切换到数据源工作表
 Sheets("数据源").Select
 
-'从第1列到最后一个需要补齐数据的列
-For i = 1 To Application.Match("是否支持JAVA", Range("A1:AZ1"), 0)
-    For j = 2 To ActiveSheet.UsedRange.Rows.Count
-        If Cells(j, i) = "" Then
-            Cells(j, i) = Cells(j - 1, i)
-        End If
-    Next
-    Application.StatusBar = "补齐数据" & GetProgress(i, 23)
-Next
-
 '清洗链接
 For j = 0 To rowmax - 2
     Debug.Print rowmax
@@ -38,40 +28,34 @@ For j = 0 To rowmax - 2
     Application.StatusBar = "清洗中" & GetProgress(j, rowmax - 1)
 Next
 
-'修改日期格式
-Columns(Application.Match("访问时间", Range("A1:AZ1"), 0)).NumberFormatLocal = "yyyy/mm/dd hh:mm:ss"
-Columns(Application.Match("上一次访问时间", Range("A1:AZ1"), 0)).NumberFormatLocal = "yyyy/mm/dd hh:mm:ss"
-
 '分列
-Call insert_col("访问时间", "A1:AZ1")
+Columns(Application.Match("访问时间", Range("A1:AZ1"), 0)).Select
+Selection.Replace What:="  ", Replacement:=","
 Call insert_col("访问时间", "A1:AZ1")
 
 d = Application.Match("访问时间", Range("A1:AZ1"), 0)
 Columns(d).Select
 d1 = Split(Cells(1, d).Address, "$")(1)
-Selection.TextToColumns Destination:=Range(d1 & 1), Space:=True
-Columns(d + 2).Delete Shift:=xlToLeft
+Selection.TextToColumns Destination:=Range(d1 & 1), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=True, Tab:=False, _
+        Semicolon:=False, Comma:=True, Space:=False, Other:=False, FieldInfo _
+        :=Array(Array(1, 1), Array(2, 5)), TrailingMinusNumbers:=True
 Cells(1, d) = "访问日期"
 Cells(1, d + 1) = "访问时间"
 
-'修改日期格式
-Columns(Application.Match("访问日期", Range("A1:AZ1"), 0)).NumberFormatLocal = "yyyy/mm/dd"
-Columns(Application.Match("访问时间", Range("A1:AZ1"), 0)).NumberFormatLocal = "hh:mm:ss"
-
-Call insert_col("上一次访问时间", "A1:AZ1")
+Columns(Application.Match("上一次访问时间", Range("A1:AZ1"), 0)).Select
+Selection.Replace What:="  ", Replacement:=","
 Call insert_col("上一次访问时间", "A1:AZ1")
 
 e = Application.Match("上一次访问时间", Range("A1:AZ1"), 0)
 Columns(e).Select
 e1 = Split(Cells(1, e).Address, "$")(1)
-Selection.TextToColumns Destination:=Range(e1 & 1), Space:=True
-Columns(e + 2).Delete Shift:=xlToLeft
+Selection.TextToColumns Destination:=Range(e1 & 1), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=True, Tab:=False, _
+        Semicolon:=False, Comma:=True, Space:=False, Other:=False, FieldInfo _
+        :=Array(Array(1, 1), Array(2, 5)), TrailingMinusNumbers:=True
 Cells(1, e) = "上一次访问日期"
 Cells(1, e + 1) = "上一次访问时间"
-
-'修改日期格式
-Columns(Application.Match("上一次访问日期", Range("A1:AZ1"), 0)).NumberFormatLocal = "yyyy/mm/dd"
-Columns(Application.Match("上一次访问时间", Range("A1:AZ1"), 0)).NumberFormatLocal = "hh:mm:ss"
 
 '清洗访问时长、停留时长
 Columns(Application.Match("访问时长", Range("A1:AZ1"), 0)).Select
@@ -81,6 +65,23 @@ Selection.Replace What:="s", Replacement:=""
 Columns(Application.Match("停留时长", Range("A1:AZ1"), 0)).Select
 Selection.Replace What:="正在访问", Replacement:="0"
 Selection.Replace What:="s", Replacement:=""
+
+'其他列格式
+Columns(Application.Match("访问时间", Range("A1:AZ1"), 0)).NumberFormatLocal = "G/通用格式"
+Columns(Application.Match("访问页数", Range("A1:AZ1"), 0)).NumberFormatLocal = "G/通用格式"
+Columns(Application.Match("访问频次", Range("A1:AZ1"), 0)).NumberFormatLocal = "G/通用格式"
+Columns(Application.Match("停留时长", Range("A1:AZ1"), 0)).NumberFormatLocal = "G/通用格式"
+Columns(Application.Match("打开时间", Range("A1:AZ1"), 0)).NumberFormatLocal = "hh:mm:ss"
+
+'修改日期格式
+Columns(Application.Match("访问日期", Range("A1:AZ1"), 0)).Select
+Selection.NumberFormatLocal = "yyyy/mm/dd"
+Columns(Application.Match("访问时间", Range("A1:AZ1"), 0)).Select
+Selection.NumberFormatLocal = "[$-x-systime]h:mm:ss AM/PM"
+Columns(Application.Match("上一次访问日期", Range("A1:AZ1"), 0)).Select
+Selection.NumberFormatLocal = "yyyy/mm/dd"
+Columns(Application.Match("上一次访问时间", Range("A1:AZ1"), 0)).Select
+Selection.NumberFormatLocal = "[$-x-systime]h:mm:ss AM/PM"
 
 '填写列标题
 Range("A1") = "序号"
@@ -96,6 +97,16 @@ Cells(1, g + 2) = "最后停留名称"
 h = Application.Match("页面地址", Range("A1:AZ1"), 0)
 Cells(1, h + 1) = "页面清洗"
 Cells(1, h + 2) = "页面名称"
+
+'从第1列到最后一个需要补齐数据的列
+For i = 1 To Application.Match("是否支持JAVA", Range("A1:AZ1"), 0)
+    For j = 2 To ActiveSheet.UsedRange.Rows.Count
+        If Cells(j, i) = "" Then
+            Cells(j, i) = Cells(j - 1, i)
+        End If
+    Next
+    Application.StatusBar = "补齐数据" & GetProgress(i, 23)
+Next
 
 MsgBox "清洗完成"
 End Sub
@@ -132,6 +143,3 @@ Dim i As Single, j As Integer, s As String
     Next n
     GetProgress = s & FormatNumber(curValue / maxValue * 100, 2) & "%"
 End Function
-
-
-
