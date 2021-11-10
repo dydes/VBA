@@ -1,4 +1,4 @@
-Sub test()
+Sub 套round1()
 '获取最大范围》行列循环》单元格呈现是否为数字》Y套round（其中公式需要特殊处理）
                                         'N不动（包括空与文本均不动）
 '获取最大行列
@@ -23,7 +23,7 @@ For j = 1 To colmax
             End If
         End If
     Next
-    Application.StatusBar = GetProgress(j, colmax)
+    Application.StatusBar = "整体进度" & GetProgress(j, colmax)
 Next
 MsgBox "操作完成"
 Application.StatusBar = False
@@ -41,3 +41,5 @@ For n = 1 To 20 - j
 Next
 GetProgress = s & FormatNumber(curValue / maxValue * 100, 2) & "%"
 End Function
+
+
