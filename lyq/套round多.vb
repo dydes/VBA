@@ -1,4 +1,5 @@
 Sub 套roundn()
+Application.ScreenUpdating = False '关闭更新 
 '逐个sheet操作
 mycount = Worksheets.Count
 For sh = 1 To mycount
@@ -32,10 +33,11 @@ For sh = 1 To mycount
         Application.StatusBar = "整体进度" & GetProgress(sh, mycount)
     End If
 Next
-
+Application.ScreenUpdating = True '开启更新
 MsgBox "操作完成"
 Application.StatusBar = False
 End Sub
+
 Function GetProgress(curValue, maxValue)
 Dim i As Single, j As Integer, s As String
 i = maxValue / 20
