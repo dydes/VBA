@@ -1,9 +1,19 @@
 Sub 统计时长()
-'1.在订单信息表里循环订单号判断，如果是人工创建，查找ID-结构对应的起始时间
-'2.如果不是人工创建，判断ID-有驳回是否存在，存在找到id-结构对应的起始时间，否则找到ID-审核的起始时间
-'3.ID-二校且ID-四校均存在，则比较哪个结束时间晚
-'4.ID-二校或ID-四校存在一个，则取那个结束时间
-'5.ID-二校或ID-四校均不存在，是否存在等待发布，存在就取，不存在取-审核的时间
+'1.在订单信息表里循环订单号判断
+'2.判断起始时间
+'   2.1 如果是人工创建，查找ID-结构对应的起始时间
+'   2.2 如果是订单创建，判断ID-有驳回是否存在
+'       2.2.1 有驳回，判断ID-结构是否存在
+'           2.2.1.1 结构存在则结构对应的起始时间
+'           2.2.1.2 结构不存在找到审核对应的起始时间
+'       2.2.2 无驳回，否则找到ID-审核的起始时间
+'3.判断结束时间
+'   3.1 ID-二校且ID-四校均存在，则比较哪个结束时间晚
+'   3.2 ID-二校或ID-四校存在一个，则取那个结束时间
+'   3.3 ID-二校或ID-四校均不存在
+'       3.3.1 是否存在等待发布，存在就取
+'       3.3.2 不存在就看录题是否存在，存在就取
+'       3.3.3 录题不存在取-审核的时间
 
 Application.ScreenUpdating = False '暂停刷新
 Application.DisplayAlerts = False '暂停通知
@@ -54,20 +64,30 @@ For i = 2 To rowmax2 '循环订单信息表中去重后的订单号
     key4 = Id_value & "-二校" 'ID-二校
     key5 = Id_value & "-四校" 'ID-四校
     key6 = Id_value & "-等待发布任务" 'ID-等待发布任务
+    key7 = Id_value & "-结构" 'ID-结构
+    key8 = Id_value & "-录题" 'ID-录题
     Set rng1 = Sheets("数据明细").Range("M:M").Find(key3, lookat:=xlWhole) '在数据明细表中查找ID-驳回列，看是否能找到ID-有
     Set rng2 = Sheets("数据明细").Range("L:L").Find(key4, lookat:=xlWhole) '在数据明细表中查找ID-状态列，看是否能找到ID-二校
     Set rng3 = Sheets("数据明细").Range("L:L").Find(key5, lookat:=xlWhole) '在数据明细表中查找ID-状态列，看是否能找到ID-四校
     Set rng4 = Sheets("数据明细").Range("L:L").Find(key6, lookat:=xlWhole) '在数据明细表中查找ID-状态列，看是否能找到ID-等待发布任务
+    set rng5 = Sheets("数据明细").Range("L:L").Find(key7, lookat:=xlWhole) '在数据明细表中查找ID-状态列，看是否能找到ID-结构
+    set rng6 = Sheets("数据明细").Range("L:L").Find(key8, lookat:=xlWhole) '在数据明细表中查找ID-状态列，看是否能找到ID-录题
     If Sheets("订单信息").Range("B" & i) = "订单创建" And rng1 Is Nothing Then
         rowx = Application.Match(key2, Sheets("数据明细").Range("L:L"), 0) '如果是订单创建且没有找到驳回，取ID-审核的行号
+    elseif Sheets("订单信息").Range("B" & i) = "订单创建" And not rng1 Is Nothing and rng5 is nothing Then
+        rowx = Application.Match(key2, Sheets("数据明细").Range("L:L"), 0) '如果是订单创建有找到驳回但没结构，也取ID-审核的行号
     Else
         rowx = Application.Match(key1, Sheets("数据明细").Range("L:L"), 0) '其他情况取ID-结构的行号
     End If
     start_t = Sheets("数据明细").Range("I" & rowx) '根据行号取起始时间
-    If rng2 Is Nothing And rng3 Is Nothing And rng4 Is Nothing Then
-        rowy = Application.Match(key2, Sheets("数据明细").Range("L:L"), 0) '如果二校、四校、等待发布任务都不存在，取ID-审核的行号
-    ElseIf rng2 Is Nothing And rng3 Is Nothing And Not rng4 Is Nothing Then
-        rowy = Application.Match(key6, Sheets("数据明细").Range("L:L"), 0) '二校、四校不存在，等待发布任务存在，取ID-等待发布任务的行号
+    If rng2 Is Nothing And rng3 Is Nothing Then '如果二校四校都不存在
+        if rng4 is nothing and rng6 is nothing then
+            rowy = Application.Match(key2, Sheets("数据明细").Range("L:L"), 0) '如果等待发布任务和录题都不存在，取ID-审核的行号
+        elseif rng4 is nothing and not rng6 is nothing then
+            rowy = Application.Match(key8, Sheets("数据明细").Range("L:L"), 0) '如果等待发布任务不存在，录题存在，取ID-录题的行号
+        else
+            rowy = Application.Match(key6, Sheets("数据明细").Range("L:L"), 0) '如果等待发布任务存在，取ID-等待发布任务的行号
+        endif
     ElseIf rng2 Is Nothing And Not rng3 Is Nothing Then
         rowy = Application.Match(key5, Sheets("数据明细").Range("L:L"), 0) '二校不存在、四校存在，取ID-四校的行号
     ElseIf Not rng2 Is Nothing And rng3 Is Nothing Then
