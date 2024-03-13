@@ -4,6 +4,7 @@ Sub CreateBubbleChartWithName()
     Dim rowmax As Long
     Dim chartName As String
     Dim crossAtValue As Double
+    Dim xmin, xmax, xstep, ymin, ymax, ystep
 
     Set ws = ActiveSheet
     rowmax = ws.UsedRange.Rows.Count '获取最大行数
@@ -60,13 +61,19 @@ Sub CreateBubbleChartWithName()
     End With
 
     ' 配置图表格式和轴
+    xmin = range("G5")
+    xmax = range("H5")
+    xstep = range("I5")
+    ymin = range("G6")
+    ymax = range("H6")
+    ystep = range("I6")
     With chartObj.Chart
-        .Axes(xlValue).MajorUnit = 1 ' 设置y轴的最大最小值、步长
-        .Axes(xlValue).MinimumScale = 0
-        .Axes(xlValue).MaximumScale = 6
-        .Axes(xlCategory).MajorUnit = 1 ' 设置x轴的最大最小值、步长
-        .Axes(xlCategory).MinimumScale = 0
-        .Axes(xlCategory).MaximumScale = 6
+        .Axes(xlCategory).MinimumScale = xmin ' 设置x轴的最小值
+        .Axes(xlCategory).MaximumScale = xmax ' 设置x轴的最值
+        .Axes(xlCategory).MajorUnit = xstep ' 设置x轴的步长
+        .Axes(xlValue).MinimumScale = ymin ' 设置y轴的最小值
+        .Axes(xlValue).MaximumScale = ymax ' 设置y轴的最大值
+        .Axes(xlValue).MajorUnit = ystep ' 设置y轴的步长
 
         '图表添加标题
         If Not .HasTitle Then
