@@ -577,11 +577,6 @@ Function psetting() '显示打印边界函数
     With ActiveSheet.PageSetup
         .PrintTitleRows = ""
         .PrintTitleColumns = ""
-    End With
-    Application.PrintCommunication = True
-    ActiveSheet.PageSetup.PrintArea = ""
-    Application.PrintCommunication = False
-    With ActiveSheet.PageSetup
         .LeftHeader = ""
         .CenterHeader = ""
         .RightHeader = ""
@@ -622,11 +617,9 @@ Function psetting() '显示打印边界函数
         .FirstPage.CenterHeader.Text = ""
         .FirstPage.RightHeader.Text = ""
         .FirstPage.LeftFooter.Text = ""
-        .FirstPage.CenterFooter.Text = ""
+        .FirstPage.CenterFooter Text = ""
         .FirstPage.RightFooter.Text = ""
     End With
     Application.PrintCommunication = True
     ActiveWindow.View = xlNormalView
 End Function
-
-
